@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nos activités - REVIVRE-FRANCE">
+  <title>Nos activités - REVIVRE-FRANCE</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-blue: #22a7f0;
+      --dark-blue: #223f93;
+      --light-blue: #4db8ff;
+      --very-light-blue: #e6f5ff;
+      --white: #ffffff;
+      --light-gray: #f5f7fa;
+      --gray: #8b95a5;
+      --dark-gray: #4a5568;
+      --text: #2d3748;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--white);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      background: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .logo-main {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--dark-blue);
+    }
+
+    .logo-sub {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    nav {
+      position: relative;
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-menu a {
+      text-decoration: none;
+      color: var(--dark-gray);
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-menu a:hover {
+      color: var(--primary-blue);
+    }
+
+    .btn-nav {
+      background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+      color: var(--white) !important;
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .mobile-toggle span {
+      width: 25px;
+      height: 3px;
+      background: var(--dark-blue);
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+      color: var(--white);
+      padding: 4rem 0;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .section {
+      padding: 4rem 0;
+    }
+
+    .section-gray {
+      background: var(--light-gray);
+    }
+
+    .section-blue {
+      background: var(--very-light-blue);
+    }
+
+    .content-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      color: var(--dark-blue);
+      margin-bottom: 2rem;
+      font-weight: 700;
+    }
+
+    h3 {
+      font-size: 1.75rem;
+      color: var(--dark-blue);
+      margin: 2rem 0 1rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      line-height: 1.8;
+      color: var(--dark-gray);
+    }
+
+    strong {
+      color: var(--dark-blue);
+      font-weight: 600;
+    }
+
+    .highlight-box {
+      background: var(--very-light-blue);
+      border-left: 4px solid var(--primary-blue);
+      padding: 2rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+
+    .info-box {
+      background: var(--white);
+      border: 2px solid var(--primary-blue);
+      padding: 2rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+
+    ul {
+      margin: 1rem 0 1.5rem 2rem;
+      line-height: 1.8;
+    }
+
+    ul li {
+      margin-bottom: 0.75rem;
+      color: var(--dark-gray);
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .activity-card {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+    }
+
+    .activity-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .activity-card h4 {
+      color: var(--dark-blue);
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    footer {
+      background: var(--dark-blue);
+      color: var(--white);
+      padding: 4rem 0 2rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-col h4 {
+      color: var(--white);
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      margin: 0;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-col a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-col a:hover {
+      color: var(--white);
+    }
+
+    .footer-text {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .newsletter-form input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--white);
+    }
+
+    .newsletter-form input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .newsletter-form button {
+      padding: 0.75rem 1.5rem;
+      background: var(--primary-blue);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .newsletter-form button:hover {
+      background: var(--light-blue);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .social-links a {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      transition: all 0.3s;
+    }
+
+    .social-links a:hover {
+      background: var(--primary-blue);
+      transform: translateY(-3px);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: var(--white);
+        flex-direction: column;
+        width: 250px;
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        margin-top: 1rem;
+      }
+
+      .nav-menu.active {
+        display: flex;
+      }
+
+      .mobile-toggle {
+        display: flex;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 2rem;
+      }
+
+      .section {
+        padding: 3rem 0;
+      }
+
+      .hero {
+        padding: 3rem 0;
+      }
+
+      .activity-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-main">REVIVRE-FRANCE</div>
+          <div class="logo-sub">Association Troubles Anxieux</div>
+        </div>
+        <nav>
+          <button class="mobile-toggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <ul class="nav-menu">
+            <li><a href="index.html">Accueil</a></li>
+            <li><a href="#troubles">Troubles Anxieux</a></li>
+            <li><a href="nos-activites.html">Nos Activités</a></li>
+            <li><a href="#agenda">Agenda</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#adhesion" class="btn-nav">Adhérer</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Nos activités</h1>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="content-wrapper">
+          <div class="highlight-box">
+            <p>L'association privilégie les Groupes de Parole dits "libres", uniquement entre "souffrants" et sans la présence d'un professionnel de la santé mentale. Les accompagnants sont acceptés seulement si la personne souffrante ne peut pas venir seule !</p>
+          </div>
+
+          <p>Ces groupes permettent aux participants de s'exprimer autour des Troubles Anxieux et de sortir de l'isolement. Ainsi, chacun peut partager son expérience personnelle avec des personnes confrontées à des problématiques similaires.</p>
+
+          <p>Pour cela, un cadre d'écoute et de non-jugement est garanti par les animateurs et les membres de l'association.</p>
+
+          <div class="info-box">
+            <p><strong>La prise de parole n'est pas obligatoire, mais reste encouragée durant les regroupements!</strong></p>
+          </div>
+
+          <h2>Déroulement des Groupes de Parole</h2>
+
+          <p><strong>Accueil des nouveaux</strong> avec une courte présentation de Revivre-France.</p>
+
+          <h3>Groupe de Parole Libre (GPL)</h3>
+          <p>Animé par des membres de l'association:</p>
+          <ul>
+            <li>Un « tour de météo » offre à chacun la possibilité d'exprimer son ressenti lié à l'anxiété (au cours des derniers jours ou depuis le précédent groupe). Les autres participants peuvent ensuite réagir et poser des questions, ce qui favorise les échanges et les partages d'expérience.</li>
+          </ul>
+
+          <p style="text-align: center; font-size: 1.5rem; color: var(--primary-blue); margin: 2rem 0;">OU BIEN</p>
+
+          <h3>Groupe de Parole Thématique (GPT)</h3>
+          <p>Animé par des membres de l'association ou par un intervenant professionnel:</p>
+          <ul>
+            <li>Un tour de parole permet à chacun de s'exprimer autour d'un thème prédéfini. Les autres participants peuvent ensuite réagir et poser des questions, comme pour les GPL. Plusieurs tours peuvent avoir lieu en fonction du nombre de présents.</li>
+          </ul>
+
+          <h2>Dates et lieux des réunions</h2>
+
+          <div class="activity-grid">
+            <div class="activity-card">
+              <h4>📍 En présentiel</h4>
+              <p><strong>Le mercredi</strong> (2 à 3 par mois, de 18h30 à 20h30):</p>
+              <p>ESPACE FRANÇOIS LAFFONT (Grande Salle)</p>
+            </div>
+            <div class="activity-card">
+              <h4>💻 En visioconférence</h4>
+              <p>Des groupes de parole en ligne sont également disponibles pour ceux qui ne peuvent pas se déplacer.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>À propos</h4>
+          <ul>
+            <li><a href="index.html">L'Association</a></li>
+            <li><a href="#troubles">Troubles Anxieux</a></li>
+            <li><a href="nos-activites.html">Nos Activités</a></li>
+            <li><a href="#agenda">Agenda</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Ressources</h4>
+          <ul>
+            <li><a href="#troubles">Phobie Sociale</a></li>
+            <li><a href="#troubles">Anxiété Généralisée</a></li>
+            <li><a href="#troubles">Trouble Panique</a></li>
+            <li><a href="#troubles">Agoraphobie</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Participer</h4>
+          <ul>
+            <li><a href="#adhesion">Adhérer</a></li>
+            <li><a href="#don">Faire un Don</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#agenda">Événements</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Newsletter</h4>
+          <p class="footer-text">Restez informé de nos actualités</p>
+          <form class="newsletter-form">
+            <input type="email" placeholder="Votre email" required>
+            <button type="submit">OK</button>
+          </form>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook">📘</a>
+            <a href="#" aria-label="LinkedIn">💼</a>
+            <a href="#" aria-label="Instagram">📷</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 REVIVRE-FRANCE - Association Troubles Anxieux. Tous droits réservés.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const mobileToggle = document.querySelector('.mobile-toggle');
+      const navMenu = document.querySelector('.nav-menu');
+
+      if (mobileToggle) {
+        mobileToggle.addEventListener('click', () => {
+          navMenu.classList.toggle('active');
+        });
+      }
+
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = document.querySelector(anchor.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (navMenu.classList.contains('active')) {
+              navMenu.classList.remove('active');
+            }
+          }
+        });
+      });
+
+      const forms = document.querySelectorAll('form');
+      forms.forEach(form => {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          alert('Merci pour votre intérêt ! (Démo)');
+          form.reset();
+        });
+      });
+
+      window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 50) {
+          header.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+        } else {
+          header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
