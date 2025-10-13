@@ -128,7 +128,10 @@
       <div class="container">
         <h2 class="section-title">Prochains Groupes de Parole</h2>
         <p class="section-subtitle">Rejoignez-nous lors de nos prochaines rencontres</p>
-        <div class="grid grid-2">
+        <div id="agenda-events"><!-- dynamic events will be injected here --></div>
+
+        <!-- Fallback static markup (will be shown if JS fails or while loading) -->
+        <div id="agenda-fallback" class="grid grid-2">
           <div class="event-card">
             <div class="event-date">
               <div class="day">11</div>
@@ -228,5 +231,157 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    (function(){
+      async function fetchAgenda() {
+        const start = new Date();
+        const end = new Date(start);
+        end.setDate(end.getDate() + 7);
+        
+        const fmt = d => d.toISOString().slice(0,10);
+
+        // send parameters in multipart/form-data body (FormData)
+        const apiUrl = 'https://www.revivre-france.org/page/ressources/agenda-events';
+        const form = new FormData();
+        form.append('id', '129622');
+        form.append('pageId', '580895');
+        form.append('start', fmt(start));
+        form.append('end', fmt(end));
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+
+        try {
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            body: form,
+            signal: controller.signal
+          });
+          clearTimeout(timeout);
+
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+
+          renderEvents(data);
+        } catch (err) {
+          console.warn('Agenda fetch failed:', err);
+        }
+      }
+
+      function renderEvents(items) {
+        if (!Array.isArray(items) || items.length === 0) return;
+        const container = document.getElementById('agenda-events');
+        if (!container) return;
+        // hide fallback
+        const fallback = document.getElementById('agenda-fallback');
+        if (fallback) fallback.style.display = 'none';
+
+        const grid = document.createElement('div');
+        grid.className = 'grid grid-2';
+        grid.style.display = 'grid';
+        grid.style.gap = '2rem';
+        grid.style.gridTemplateColumns = 'repeat(2,1fr)';
+
+        items.forEach(it => {
+          // expected fields: date, title, location, time, description
+          const card = document.createElement('div');
+          card.className = 'event-card';
+          card.style.background = '#ffffff';
+          card.style.borderRadius = '12px';
+          card.style.overflow = 'hidden';
+          card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+          card.style.display = 'flex';
+          card.style.transition = 'transform 0.3s';
+          card.style.borderLeft = '4px solid #22a7f0';
+
+          const dateCol = document.createElement('div');
+          dateCol.className = 'event-date';
+          dateCol.style.background = 'linear-gradient(135deg,#22a7f0,#223f93)';
+          dateCol.style.color = '#ffffff';
+          dateCol.style.padding = '2rem 1.5rem';
+          dateCol.style.textAlign = 'center';
+          dateCol.style.display = 'flex';
+          dateCol.style.flexDirection = 'column';
+          dateCol.style.justifyContent = 'center';
+          dateCol.style.minWidth = '120px';
+
+          const day = document.createElement('div');
+          day.className = 'day';
+          day.style.fontSize = '3rem';
+          day.style.fontWeight = '700';
+          day.style.lineHeight = '1';
+          const d = parseDateForDisplay(it.date || it.start || it.eventDate);
+          day.textContent = d.day;
+
+          const month = document.createElement('div');
+          month.className = 'month';
+          month.style.fontSize = '1rem';
+          month.style.textTransform = 'uppercase';
+          month.style.marginTop = '0.5rem';
+          month.textContent = d.month;
+
+          dateCol.appendChild(day);
+          dateCol.appendChild(month);
+
+          const content = document.createElement('div');
+          content.className = 'event-content';
+          content.style.padding = '2rem';
+          content.style.flex = '1';
+
+          const title = document.createElement('h3');
+          title.style.color = '#223f93';
+          title.style.marginBottom = '1rem';
+          title.style.fontSize = '1.5rem';
+          title.textContent = it.title || it.name || 'Groupe de parole';
+
+          const info1 = document.createElement('p');
+          info1.className = 'event-info';
+          info1.style.color = '#8b95a5';
+          info1.style.fontSize = '0.95rem';
+          info1.style.marginBottom = '0.5rem';
+          info1.textContent = it.location || it.venue || '';
+
+          const info2 = document.createElement('p');
+          info2.className = 'event-info';
+          info2.style.color = '#8b95a5';
+          info2.style.fontSize = '0.95rem';
+          info2.style.marginBottom = '0.5rem';
+          info2.textContent = it.time || it.startTime || '';
+
+          const desc = document.createElement('p');
+          desc.style.color = '#4a5568';
+          desc.textContent = it.description || '';
+
+          content.appendChild(title);
+          if (info1.textContent) content.appendChild(info1);
+          if (info2.textContent) content.appendChild(info2);
+          if (desc.textContent) content.appendChild(desc);
+
+          card.appendChild(dateCol);
+          card.appendChild(content);
+
+          grid.appendChild(card);
+        });
+
+        container.appendChild(grid);
+      }
+
+      function parseDateForDisplay(dateStr) {
+        if (!dateStr) return { day: '', month: '' };
+        const d = new Date(dateStr);
+        if (isNaN(d)) return { day: '', month: '' };
+        const day = String(d.getDate()).padStart(2,'0');
+        const month = d.toLocaleString('fr-FR', { month: 'long' });
+        return { day, month };
+      }
+
+      // run after DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fetchAgenda);
+      } else {
+        fetchAgenda();
+      }
+    })();
+  </script>
 </body>
 </html>
