@@ -231,6 +231,10 @@ nav {
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .card:hover {
@@ -297,9 +301,9 @@ nav {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  display: flex;
+  display: block;
   transition: transform 0.3s;
-  border-left: 4px solid var(--primary-blue);
+  border-bottom: 4px solid var(--primary-blue);
 }
 
 .event-card:hover {
