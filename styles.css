@@ -574,14 +574,21 @@ body {
   background: var(--white);
   color: var(--text-dark);
   font-size: 16px;
+  /* If this site is embedded in a fixed-width iframe (e.g. 1104px),
+     provide room for the container shadow so it isn't clipped. */
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(213, 235, 247, 0.45) 0%, var(--white) 60%);
 }
 
 /* Container for ASO Connect iframe */
 .iframe-container {
+  width: 100%;
   max-width: 1104px;
   margin: 0 auto;
   background: var(--white);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
 }
 
 .container {
