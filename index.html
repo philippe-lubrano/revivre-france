@@ -37,6 +37,21 @@
       font-size: 16px;
     }
 
+    /* Mode "page dans une iframe" : on maximise la fiabilité du scroll mobile */
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+
+    a, button {
+      touch-action: manipulation;
+    }
+
     /* Container pour iframe 1104px max */
     .iframe-container {
       width: 100%;
@@ -568,5 +583,79 @@
       </section>
     </main>
   </div>
+
+  <script>
+    // Fallback "anti-scroll bloqué" (Android Chrome) quand la page est intégrée
+    // dans une iframe d'un widget (CRM) et que le scroll natif devient intermittent.
+    (function () {
+      if (window.self === window.top) return;
+
+      const ua = navigator.userAgent || '';
+      const isAndroidChrome = /Android/i.test(ua) && /Chrome\//i.test(ua);
+      if (!isAndroidChrome) return;
+
+      const interactiveSelector = 'a, button, input, textarea, select, label, summary, details, [contenteditable="true"]';
+
+      function hasScrollableAncestor(element) {
+        for (let node = element; node && node !== document.body; node = node.parentElement) {
+          const style = window.getComputedStyle(node);
+          const overflowY = style.overflowY;
+          if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight + 1) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      let active = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      document.addEventListener('touchstart', (event) => {
+        if (event.touches.length !== 1) {
+          active = false;
+          return;
+        }
+
+        const target = event.target;
+        const startedOnInteractive = !!(target && target.closest && target.closest(interactiveSelector));
+        const startedOnScrollable = !!(target && target.closest && hasScrollableAncestor(target));
+        active = !startedOnInteractive && !startedOnScrollable;
+
+        const t = event.touches[0];
+        lastX = t.clientX;
+        lastY = t.clientY;
+      }, { passive: true, capture: true });
+
+      document.addEventListener('touchmove', (event) => {
+        if (!active || event.touches.length !== 1) return;
+
+        const t = event.touches[0];
+        const dx = t.clientX - lastX;
+        const dy = t.clientY - lastY;
+
+        // On ne force que le scroll vertical.
+        if (Math.abs(dy) < Math.abs(dx)) {
+          lastX = t.clientX;
+          lastY = t.clientY;
+          return;
+        }
+
+        const scrollingElement = document.scrollingElement || document.documentElement;
+        const maxScroll = scrollingElement.scrollHeight - window.innerHeight;
+        if (maxScroll <= 0) return;
+
+        // On prend la main : le geste devient un scroll programmatique.
+        event.preventDefault();
+        window.scrollBy(0, -dy);
+
+        lastX = t.clientX;
+        lastY = t.clientY;
+      }, { passive: false, capture: true });
+
+      document.addEventListener('touchend', () => { active = false; }, { passive: true, capture: true });
+      document.addEventListener('touchcancel', () => { active = false; }, { passive: true, capture: true });
+    })();
+  </script>
 </body>
 </html>
