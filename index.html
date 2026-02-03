@@ -350,8 +350,9 @@
       box-shadow: 0 8px 0 rgba(0,0,0,0.1);
       transition: all 0.3s ease;
       border: 1px solid rgba(162, 206, 228, 0.2);
-      min-height: 350px;
-      max-height: 350px;
+      min-height: 360px;
+      max-height: 360px;
+      position: relative;
     }
 
     .event-date {
@@ -382,10 +383,12 @@
       padding: 25px;
       flex: 1;
       min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .event-content h3 {
-      margin-bottom: 12px;
+      margin: 0;
       color: var(--primary);
       font-size: 1.3rem;
       font-weight: 600;
@@ -427,6 +430,55 @@
     .event-more:focus {
       outline: 2px solid var(--primary);
       outline-offset: 2px;
+    }
+
+    /* Post-it d'inscription (si buttonUrl est présent) */
+    .event-signup {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 3;
+      display: inline-block;
+      max-width: 48%;
+      height: 84px;
+      padding: 26px 12px;
+      background: #FFD668;
+      color: #2b2b2b;
+      font-weight: 800;
+      font-size: 0.95rem;
+      line-height: 1.15;
+      text-decoration: none;
+      border-radius: 0;
+      border: 1px solid rgba(0,0,0,0.10);
+      box-shadow: 0 12px 26px rgba(0,0,0,0.18);
+      transform: rotate(-7deg);
+      transform-origin: 20% 20%;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .event-signup::before {
+      content: '';
+      position: absolute;
+      top: -11px;
+      left: 18px;
+      width: 46px;
+      height: 16px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 6px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.10);
+      transform: rotate(-2deg);
+    }
+
+    .event-signup:hover {
+      transform: rotate(-7deg) translateY(-1px);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.22);
+    }
+
+    .event-signup:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 3px;
     }
 
     /* Modale Agenda */
@@ -561,9 +613,14 @@
       }
 
       .event-card {
-        min-height: 354px;
-        max-height: 354px;
+        min-height: 360px;
+        max-height: 360px;
       }
+
+      .event-signup {
+        right: 40px;
+      }
+
       .event-date {
         min-width: auto;
         padding: 15px;
@@ -648,8 +705,8 @@
           <p class="hero-subtitle">L'association des personnes qui souffrent de Troubles Anxieux</p>
           <p class="hero-description">Association indépendante, soutenue par des professionnels en santé mentale.</p>
           <div class="hero-buttons">
-            <a href="#adhesion" class="btn btn-primary">Adhérer à l'Association</a>
-            <a href="#don" class="btn btn-secondary">Faire un Don</a>
+            <a href="https://www.revivre-france.org/page/587643-j-adhere" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Adhérer à l'Association</a>
+            <a href="https://www.revivre-france.org/collect/description/200648-e-don-a-revivre-france" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Faire un Don</a>
           </div>
         </div>
       </section>
@@ -802,12 +859,12 @@
             <div class="card card-cta">
               <h3>Adhérer à l'association</h3>
               <p>Devenez membre de REVIVRE-FRANCE et participez activement à la vie de l'association. Votre adhésion nous aide à organiser plus d'événements et à soutenir davantage de personnes.</p>
-              <a href="#adhesion" class="btn btn-primary">Adhérer maintenant</a>
+              <a href="https://www.revivre-france.org/page/587643-j-adhere" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Adhérer maintenant</a>
             </div>
             <div class="card card-cta">
               <h3>Faire un don</h3>
               <p>Chaque contribution, quelle que soit sa taille, fait une différence. Votre don nous permet de maintenir nos activités gratuites et accessibles à tous.</p>
-              <a href="#don" class="btn btn-primary">Faire un don</a>
+              <a href="https://www.revivre-france.org/collect/description/200648-e-don-a-revivre-france" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Faire un don</a>
             </div>
           </div>
         </div>
@@ -820,7 +877,7 @@
       async function fetchAgenda() {
         const start = new Date();
         const end = new Date(start);
-        end.setDate(end.getDate() + 7);
+        end.setDate(end.getDate() + 30);
 
         const fmt = d => d.toISOString().slice(0,10);
 
@@ -939,6 +996,19 @@
         desc.className = 'event-desc';
         desc.textContent = isLong ? (fullDesc.slice(0, MAX_DESC_CHARS).trimEnd() + '…') : fullDesc;
 
+        const signupUrl = normalizeUrl(it && it.buttonUrl);
+
+        if (signupUrl) {
+          const signup = document.createElement('a');
+          signup.className = 'event-signup';
+          signup.href = signupUrl;
+          signup.target = '_blank';
+          signup.rel = 'noopener noreferrer';
+          signup.textContent = "S'inscrire";
+          signup.setAttribute('aria-label', "S'inscrire à l'événement");
+          card.appendChild(signup);
+        }
+
         content.appendChild(title);
         if (info1.textContent) content.appendChild(info1);
         if (info2.textContent) content.appendChild(info2);
@@ -969,6 +1039,16 @@
 
       function normalizeText(value) {
         return String(value || '').replace(/\s+/g, ' ').trim();
+      }
+
+      function normalizeUrl(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return '';
+        try {
+          return new URL(raw, window.location.href).toString();
+        } catch {
+          return '';
+        }
       }
 
       function formatEventDate(it) {
@@ -1282,6 +1362,10 @@
       let active = false;
       let lastX = 0;
       let lastY = 0;
+      let lastScrollY = 0;
+      let stuckMoves = 0;
+      let forcing = false;
+      let accumDy = 0;
 
       document.addEventListener('touchstart', (event) => {
         if (event.touches.length !== 1) {
@@ -1297,6 +1381,11 @@
         const t = event.touches[0];
         lastX = t.clientX;
         lastY = t.clientY;
+
+        lastScrollY = window.scrollY || window.pageYOffset || 0;
+        stuckMoves = 0;
+        forcing = false;
+        accumDy = 0;
       }, { passive: true, capture: true });
 
       document.addEventListener('touchmove', (event) => {
@@ -1317,16 +1406,53 @@
         const maxScroll = scrollingElement.scrollHeight - window.innerHeight;
         if (maxScroll <= 0) return;
 
-        // On prend la main : le geste devient un scroll programmatique.
+        // Par défaut, on laisse le navigateur scroller normalement.
+        // On ne "prend la main" que si le scroll natif semble bloqué.
+        if (!forcing) {
+          const currentScrollY = window.scrollY || window.pageYOffset || 0;
+          const bigEnoughMove = Math.abs(dy) >= 6;
+
+          if (bigEnoughMove && currentScrollY === lastScrollY) {
+            stuckMoves += 1;
+          } else {
+            stuckMoves = 0;
+          }
+
+          lastScrollY = currentScrollY;
+
+          // Après quelques mouvements sans progression de scroll, on active le mode "force".
+          if (stuckMoves >= 2) {
+            forcing = true;
+            accumDy = 0;
+          }
+
+          lastX = t.clientX;
+          lastY = t.clientY;
+          return;
+        }
+
+        // Mode "force" : le geste devient un scroll programmatique.
         event.preventDefault();
-        window.scrollBy(0, -dy);
+        accumDy += dy;
+        if (Math.abs(accumDy) >= 8) {
+          window.scrollBy(0, -accumDy);
+          accumDy = 0;
+        }
 
         lastX = t.clientX;
         lastY = t.clientY;
       }, { passive: false, capture: true });
 
-      document.addEventListener('touchend', () => { active = false; }, { passive: true, capture: true });
-      document.addEventListener('touchcancel', () => { active = false; }, { passive: true, capture: true });
+      document.addEventListener('touchend', () => {
+        active = false;
+        forcing = false;
+        accumDy = 0;
+      }, { passive: true, capture: true });
+      document.addEventListener('touchcancel', () => {
+        active = false;
+        forcing = false;
+        accumDy = 0;
+      }, { passive: true, capture: true });
     })();
   </script>
 </body>
