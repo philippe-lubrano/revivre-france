@@ -1416,10 +1416,27 @@
         const maxScroll = scrollingElement.scrollHeight - window.innerHeight;
         if (maxScroll <= 0) return;
 
+        const currentScrollY = window.scrollY || window.pageYOffset || 0;
+        const atTop = currentScrollY <= 0;
+        const atBottom = currentScrollY >= (maxScroll - 1);
+        // dy > 0 : doigt vers le bas => tentative de scroll vers le haut
+        // dy < 0 : doigt vers le haut => tentative de scroll vers le bas
+        const tryingPastTop = atTop && dy > 0;
+        const tryingPastBottom = atBottom && dy < 0;
+
         // Par défaut, on laisse le navigateur scroller normalement.
         // On ne "prend la main" que si le scroll natif semble bloqué.
         if (!forcing) {
-          const currentScrollY = window.scrollY || window.pageYOffset || 0;
+          // Important : si on est à une extrémité et qu'on "pousse" au-delà,
+          // on n'interfère pas. Ça permet au scroll de la page parente de prendre le relais.
+          if (tryingPastTop || tryingPastBottom) {
+            stuckMoves = 0;
+            lastScrollY = currentScrollY;
+            lastX = t.clientX;
+            lastY = t.clientY;
+            return;
+          }
+
           const bigEnoughMove = Math.abs(dy) >= 6;
 
           if (bigEnoughMove && currentScrollY === lastScrollY) {
@@ -1442,6 +1459,18 @@
         }
 
         // Mode "force" : le geste devient un scroll programmatique.
+        // Si on est à une extrémité et qu'on pousse au-delà, on relâche la main
+        // pour laisser le scroll se chaîner vers la page parente.
+        if (tryingPastTop || tryingPastBottom) {
+          forcing = false;
+          stuckMoves = 0;
+          accumDy = 0;
+          lastScrollY = currentScrollY;
+          lastX = t.clientX;
+          lastY = t.clientY;
+          return;
+        }
+
         event.preventDefault();
         accumDy += dy;
         if (Math.abs(accumDy) >= 8) {
