@@ -1376,6 +1376,38 @@
       let stuckMoves = 0;
       let forcing = false;
       let accumDy = 0;
+      let parentAccum = 0;
+      let canScrollParent = null;
+
+      function relayScrollToParent(deltaY) {
+        // deltaY suit la convention window.scrollBy: + => scroll vers le bas.
+        // 1) On notifie toujours le parent (si jamais il écoute).
+        try {
+          window.parent.postMessage({ type: 'revivre:scroll', deltaY }, '*');
+        } catch {
+          // ignore
+        }
+
+        // 2) Tentative directe si même-origin (ou si le navigateur l'autorise).
+        if (canScrollParent === false) return false;
+        if (canScrollParent === null) {
+          try {
+            window.parent.scrollBy(0, 0);
+            canScrollParent = true;
+          } catch {
+            canScrollParent = false;
+            return false;
+          }
+        }
+
+        try {
+          window.parent.scrollBy(0, deltaY);
+          return true;
+        } catch {
+          canScrollParent = false;
+          return false;
+        }
+      }
 
       document.addEventListener('touchstart', (event) => {
         if (event.touches.length !== 1) {
@@ -1424,12 +1456,24 @@
         const tryingPastTop = atTop && dy > 0;
         const tryingPastBottom = atBottom && dy < 0;
 
+        if (!tryingPastTop && !tryingPastBottom) {
+          parentAccum = 0;
+        }
+
         // Par défaut, on laisse le navigateur scroller normalement.
         // On ne "prend la main" que si le scroll natif semble bloqué.
         if (!forcing) {
           // Important : si on est à une extrémité et qu'on "pousse" au-delà,
           // on n'interfère pas. Ça permet au scroll de la page parente de prendre le relais.
           if (tryingPastTop || tryingPastBottom) {
+            // Tentative de relais vers la page parente.
+            parentAccum += (-dy);
+            if (Math.abs(parentAccum) >= 10) {
+              const relayed = relayScrollToParent(parentAccum);
+              parentAccum = 0;
+              // Si on a pu relayer, on évite le "bounce" dans l'iframe.
+              if (relayed) event.preventDefault();
+            }
             stuckMoves = 0;
             lastScrollY = currentScrollY;
             lastX = t.clientX;
@@ -1465,6 +1509,12 @@
           forcing = false;
           stuckMoves = 0;
           accumDy = 0;
+          parentAccum += (-dy);
+          if (Math.abs(parentAccum) >= 10) {
+            const relayed = relayScrollToParent(parentAccum);
+            parentAccum = 0;
+            if (relayed) event.preventDefault();
+          }
           lastScrollY = currentScrollY;
           lastX = t.clientX;
           lastY = t.clientY;
@@ -1486,11 +1536,13 @@
         active = false;
         forcing = false;
         accumDy = 0;
+        parentAccum = 0;
       }, { passive: true, capture: true });
       document.addEventListener('touchcancel', () => {
         active = false;
         forcing = false;
         accumDy = 0;
+        parentAccum = 0;
       }, { passive: true, capture: true });
     })();
   </script>
