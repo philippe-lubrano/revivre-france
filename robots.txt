@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /index_old.html
+Disallow: /accueil-marseille.html
+
+Sitemap: https://www.revivre-france.org/sitemap.xml
