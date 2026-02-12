@@ -334,7 +334,7 @@ a.card {
     background: var(--white);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 8px 0 rgba(0,0,0,0.1);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.1);
     transition: all 0.3s ease;
     border: 1px solid rgba(162, 206, 228, 0.2);
     min-height: 360px;
@@ -565,7 +565,7 @@ a.card {
   list-style: none;
 }
 
-div#agenda-events, #agenda {
+div#agenda-events, #agenda-custom {
     max-width: 900px;
     margin: auto;
 }
