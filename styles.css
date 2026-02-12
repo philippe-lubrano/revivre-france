@@ -165,6 +165,58 @@ a, button {
 .grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .grid-4 { grid-template-columns: repeat(4, minmax(250px, 1fr)); }
 
+/* Témoignages: 2 cartes avec bouton shuffle au milieu */
+.testimonials-row {
+    position: relative;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+}
+
+.testimonials-row .card-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.testimonials-shuffle-btn {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    margin: 0;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: var(--white);
+    border: 1px solid var(--text-light);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(48, 113, 148, 0.18);
+    z-index: 1;
+}
+
+.testimonials-shuffle-btn:hover {
+    transform: translate(-50%, -50%) translateY(-1px);
+}
+
+.testimonials-shuffle-btn:active {
+    transform: translate(-50%, -50%);
+}
+
+.testimonials-shuffle-btn:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 3px;
+}
+
+.testimonials-shuffle-icon {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
 /* Carousel Agenda (si plusieurs événements) */
 .agenda-carousel {
     position: relative;
@@ -313,6 +365,9 @@ a.card {
 
 .card p {
     color: var(--text-light);
+    .grid-2, .grid-3, .grid-4, .testimonials-row {
+        grid-template-columns: 1fr;
+    }
     font-size: 1rem;
     line-height: 1.7;
     padding: 0 16px;

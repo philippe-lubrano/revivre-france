@@ -382,7 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal() {
       root.classList.remove('is-open');
       root.setAttribute('aria-hidden', 'true');
-      restoreScrollLock();
     }
 
     close.addEventListener('click', closeModal);
@@ -398,46 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.appendChild(root);
     return root;
-  }
-
-  let __scrollLockPrev = null;
-  function applyScrollLock() {
-    if (__scrollLockPrev) return;
-    const y = window.scrollY || window.pageYOffset || 0;
-    __scrollLockPrev = {
-      scrollY: y,
-      htmlOverflow: document.documentElement.style.overflow,
-      bodyOverflow: document.body.style.overflow,
-      bodyPosition: document.body.style.position,
-      bodyTop: document.body.style.top,
-      bodyLeft: document.body.style.left,
-      bodyRight: document.body.style.right,
-      bodyWidth: document.body.style.width
-    };
-
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${y}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
-  }
-
-  function restoreScrollLock() {
-    if (!__scrollLockPrev) return;
-    const y = __scrollLockPrev.scrollY || 0;
-
-    document.documentElement.style.overflow = __scrollLockPrev.htmlOverflow;
-    document.body.style.overflow = __scrollLockPrev.bodyOverflow;
-    document.body.style.position = __scrollLockPrev.bodyPosition;
-    document.body.style.top = __scrollLockPrev.bodyTop;
-    document.body.style.left = __scrollLockPrev.bodyLeft;
-    document.body.style.right = __scrollLockPrev.bodyRight;
-    document.body.style.width = __scrollLockPrev.bodyWidth;
-    __scrollLockPrev = null;
-
-    window.scrollTo(0, y);
   }
 
   function openAgendaModal(data) {
@@ -464,7 +423,6 @@ document.addEventListener('DOMContentLoaded', () => {
       bodyEl.appendChild(p);
     }
 
-    applyScrollLock();
     root.classList.add('is-open');
     root.setAttribute('aria-hidden', 'false');
     closeBtn.focus();

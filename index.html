@@ -7,6 +7,8 @@
   <title>REVIVRE-FRANCE - Refonte Moderne</title>
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
+  <script src="testimonials.js" defer></script>
+  <script src="testimonials-render.js" defer></script>
 </head>
 <body>
   <div class="iframe-container">
@@ -146,20 +148,7 @@
         <div class="container">
           <h2 class="section-title">Témoignages de nos membres</h2>
           <p class="section-subtitle">Découvrez comment REVIVRE-FRANCE a aidé d'autres personnes</p>
-          <div class="grid grid-2">
-            <div class="card">
-              <div class="card-content">
-                <p>"Grâce aux groupes de parole, je ne me sens plus seule avec mon anxiété. L'écoute bienveillante m'a permis de reprendre confiance."</p>
-                <cite>- Marie, 34 ans</cite>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-content">
-                <p>"Les ateliers m'ont donné des outils concrets pour gérer mes attaques de panique. Une vraie bouffée d'air frais."</p>
-                <cite>- Thomas, 28 ans</cite>
-              </div>
-            </div>
-          </div>
+          <div id="testimonials-grid" class="grid testimonials-row"></div>
         </div>
       </section>
 
