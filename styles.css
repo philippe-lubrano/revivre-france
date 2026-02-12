@@ -22,40 +22,35 @@ html {
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 16px 0;
+    padding: 0;
     color: var(--text-dark);
     line-height: 1.6;
     font-size: 16px;
 }
 
-/* Mode "page dans une iframe" : on maximise la fiabilité du scroll mobile */
-html, body {
-    height: 100%;
-}
-
+/* Base scroll & interactions */
 body {
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
 }
 
 a, button {
     touch-action: manipulation;
 }
 
-/* Container pour iframe 1104px max */
+/* Wrapper pleine largeur (anciennement utilisé pour l'iframe) */
 .iframe-container {
     width: 100%;
-    max-width: 1104px;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
     background: var(--white);
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #e2e2e252;
+    border-radius: 0;
+    overflow: visible;
+    border: 0;
 }
 
 .container {
-    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 0 20px;
 }
 
@@ -320,6 +315,7 @@ a.card {
     color: var(--text-light);
     font-size: 1rem;
     line-height: 1.7;
+    padding: 0 16px;
 }
 
 .card-cta {
@@ -376,6 +372,7 @@ a.card {
     min-height: 0;
     display: flex;
     flex-direction: column;
+    text-align: center;
 }
 
 .event-content h3 {
@@ -406,7 +403,7 @@ a.card {
 }
 
 .event-more {
-    margin-top: 8px;
+    margin: 8px auto 0 auto;
     padding: 0;
     border: 0;
     background: transparent;
@@ -568,7 +565,12 @@ a.card {
   list-style: none;
 }
 
-/* Responsive pour iframe */
+div#agenda-events, #agenda {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* Responsive */
 @media (max-width: 1104px) {
     .container {
     padding: 0 15px;
@@ -675,6 +677,12 @@ a.card {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    }
+
+    .event-content { text-align: left; }
+
+    .event-more {
+        margin: 8px 0 0 0;
     }
 }
 
