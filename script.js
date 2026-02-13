@@ -2,9 +2,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileToggle = document.querySelector('.mobile-toggle');
   const navMenu = document.querySelector('.nav-menu');
 
+  // Nouveau menu mobile (header commun)
+  const siteHeader = document.querySelector('.site-header');
+  const siteNavToggle = document.querySelector('.site-nav-toggle');
+  const siteNav = document.querySelector('.site-nav');
+
   if (mobileToggle) {
     mobileToggle.addEventListener('click', () => {
-      navMenu.classList.toggle('active');
+      if (navMenu) navMenu.classList.toggle('active');
+    });
+  }
+
+  if (siteHeader && siteNavToggle && siteNav) {
+    const setExpanded = (expanded) => {
+      siteNavToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    };
+
+    setExpanded(false);
+
+    siteNavToggle.addEventListener('click', () => {
+      const willOpen = !siteHeader.classList.contains('is-open');
+      siteHeader.classList.toggle('is-open');
+      setExpanded(willOpen);
+    });
+
+    // Ferme au clic sur un lien
+    siteNav.addEventListener('click', (e) => {
+      const a = e.target && e.target.closest ? e.target.closest('a') : null;
+      if (!a) return;
+      if (siteHeader.classList.contains('is-open')) {
+        siteHeader.classList.remove('is-open');
+        setExpanded(false);
+      }
+    });
+
+    // Ferme au clic hors du header
+    document.addEventListener('click', (e) => {
+      if (!siteHeader.classList.contains('is-open')) return;
+      if (siteHeader.contains(e.target)) return;
+      siteHeader.classList.remove('is-open');
+      setExpanded(false);
+    });
+
+    // Ferme avec Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (!siteHeader.classList.contains('is-open')) return;
+      siteHeader.classList.remove('is-open');
+      setExpanded(false);
     });
   }
 
@@ -14,8 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = document.querySelector(anchor.getAttribute('href'));
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        if (navMenu.classList.contains('active')) {
+
+        // Ferme l'ancien menu mobile (si présent)
+        if (navMenu && navMenu.classList.contains('active')) {
           navMenu.classList.remove('active');
+        }
+
+        // Ferme le nouveau menu mobile (si ouvert)
+        const header = document.querySelector('.site-header');
+        const toggle = document.querySelector('.site-nav-toggle');
+        if (header && header.classList.contains('is-open')) {
+          header.classList.remove('is-open');
+          if (toggle) toggle.setAttribute('aria-expanded', 'false');
         }
       }
     });

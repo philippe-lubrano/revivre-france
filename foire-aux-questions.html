@@ -25,10 +25,34 @@
   <link rel="apple-touch-icon" href="assets/RF-Favicon.png">
   <link rel="stylesheet" href="styles.css">
 
+  <script src="script.js" defer></script>
+
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.revivre-france.org/#organization","name":"Revivre-France","url":"https://www.revivre-france.org/","sameAs":["https://forum.revivre-france.org/"],"contactPoint":[{"@type":"ContactPoint","telephone":"+33749828050","contactType":"information","availableLanguage":["French"],"areaServed":"FR"}],"address":{"@type":"PostalAddress","streetAddress":"apt. 403 bâtiment A, 16 rue de la Caravelle","postalCode":"31500","addressLocality":"Toulouse","addressCountry":"FR"}},{"@type":"WebSite","@id":"https://www.revivre-france.org/#website","url":"https://www.revivre-france.org/","name":"Revivre-France","inLanguage":"fr-FR","publisher":{"@id":"https://www.revivre-france.org/#organization"}},{"@type":"WebPage","@id":"https://www.revivre-france.org/foire-aux-questions.html#webpage","url":"https://www.revivre-france.org/foire-aux-questions.html","name":"Foire aux questions — Revivre-France","description":"FAQ Revivre-France : réponses aux questions fréquentes sur l'association, les groupes de parole et les limites de ce que nous pouvons faire.","inLanguage":"fr-FR","isPartOf":{"@id":"https://www.revivre-france.org/#website"},"about":{"@id":"https://www.revivre-france.org/#organization"}}]}</script>
 </head>
 <body>
   <div class="iframe-container">
+    <header class="site-header">
+      <div class="container">
+        <div class="site-header-inner">
+          <a class="site-brand" href="index.html" aria-label="Revivre-France, accueil">
+            <img src="assets/RF-Favicon.png" alt="Revivre-France" class="site-brand-logo" width="44" height="44" loading="eager" decoding="async">
+          </a>
+          <button class="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav">
+            <span class="site-nav-toggle-bars"><span></span></span>
+          </button>
+          <nav class="site-nav" id="site-nav" aria-label="Navigation principale">
+            <a href="index.html">Accueil</a>
+            <a href="troubles-anxieux.html">Troubles</a>
+            <a href="nos-activites.html">Nos activités</a>
+            <a href="agenda.html">Agenda</a>
+            <a href="associations.html">Partenariats</a>
+            <a href="services-ecoute.html">Services d’écoute</a>
+            <a href="foire-aux-questions.html" aria-current="page">FAQ</a>
+            <a href="contact.html">Contact</a>
+          </nav>
+        </div>
+      </div>
+    </header>
     <main>
       <section class="hero" id="accueil">
         <div class="container">
@@ -520,13 +544,60 @@
             </div>
             <div class="card card-cta">
               <h3>Faire un don</h3>
-              <p>Chaque contribution, quelle que soit sa taille, fait une différence.</p>
+              <p>Chaque contribution, quelle que soit sa taille, fait une différence.
+Les dons permettent d’assurer les frais de fonctionnement de l'association.</p>
               <a href="https://www.revivre-france.org/collect/description/200648-e-don-a-revivre-france" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Faire un don</a>
             </div>
           </div>
         </div>
       </section>
     </main>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-title">Revivre-France</div>
+            <p>Association d'entraide pour personnes souffrant de troubles anxieux.</p>
+            <p><a href="https://forum.revivre-france.org/" target="_blank" rel="noopener noreferrer">Accéder au forum</a></p>
+          </div>
+          <div>
+            <div class="footer-title">Liens</div>
+            <div class="footer-links">
+              <a href="nos-activites.html">Nos activités</a>
+              <a href="agenda.html">Agenda</a>
+              <a href="foire-aux-questions.html">FAQ</a>
+              <a href="services-ecoute.html">Services d’écoute</a>
+            </div>
+          </div>
+          <div>
+            <div class="footer-title">Contact</div>
+            <p><a href="tel:+33749828050">07 49 82 80 50</a> (dimanche 17h–19h)</p>
+            <p>Siège social : 31500 Toulouse</p>
+            <p><a href="contact.html">Voir la page contact</a></p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© 2026 Revivre-France</span>
+          <span class="footer-social" aria-label="Réseaux sociaux">
+            <a class="social-link" href="https://www.instagram.com/revivrefrance" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+              <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm10 2H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3Zm-5 4.2a4.8 4.8 0 1 1 0 9.6a4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6a2.8 2.8 0 0 0 0-5.6ZM18 6.5a1.1 1.1 0 1 1-2.2 0a1.1 1.1 0 0 1 2.2 0Z"/>
+              </svg>
+            </a>
+            <a class="social-link" href="https://www.facebook.com/revivrefrance" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+              <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M14 8h2V5h-2c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h2.5l.5-3H13V9c0-.6.4-1 1-1Z"/>
+              </svg>
+            </a>
+            <a class="social-link" href="https://www.linkedin.com/company/revivre-france" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn">
+              <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6.5 6.8a1.9 1.9 0 1 1 0-3.8a1.9 1.9 0 0 1 0 3.8ZM5 21V9h3v12H5Zm5-12h2.9v1.6h.1c.4-.8 1.5-1.8 3.2-1.8c3.4 0 4 2.2 4 5.1V21h-3v-5.7c0-1.4 0-3.2-2-3.2c-2 0-2.3 1.5-2.3 3.1V21h-3V9Z"/>
+              </svg>
+            </a>
+          </span>
+        </div>
+      </div>
+    </footer>
   </div>
 </body>
 </html>
