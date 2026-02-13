@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 (function () {
   const __inited = new Set();
   const __lastItems = new Map();
+  const __filterState = new Map();
 
   const DEFAULTS = {
     daysAhead: 30,
@@ -54,7 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
     containerId: 'agenda-events',
     fallbackId: 'agenda-fallback',
     summaryId: null,
-    requestTimeoutMs: 10000
+    requestTimeoutMs: 10000,
+    cacheTtlMs: 15 * 60 * 1000,
+    cacheKeyPrefix: 'revivre:agenda'
   };
 
   function initAgenda(options) {
@@ -69,10 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
         opts.summaryId = datasetSummary;
       }
 
+      ensureCityFilterUI(opts);
+
       const key = String(opts.containerId || 'agenda-events');
       if (__inited.has(key)) {
         const last = __lastItems.get(key);
-        if (last && opts.summaryId) renderSummary(last, opts);
+        if (last !== undefined && opts.summaryId) renderSummary(last, opts);
         return;
       }
 
@@ -88,11 +93,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function fetchAgenda(opts) {
-    const start = new Date();
-    const end = new Date(start);
-    end.setDate(end.getDate() + Number(opts.daysAhead || 30));
+    const range = getAgendaRange(opts);
 
-    const fmt = (d) => d.toISOString().slice(0, 10);
+    const cached = loadCachedAgenda(opts, range);
+    if (cached !== null) {
+      __lastItems.set(String(opts.containerId || 'agenda-events'), cached);
+      renderEvents(cached, opts);
+      renderSummary(cached, opts);
+      return;
+    }
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), Number(opts.requestTimeoutMs || 10000));
@@ -100,8 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = new FormData();
     form.append('id', String(opts.id));
     form.append('pageId', String(opts.pageId));
-    form.append('start', fmt(start));
-    form.append('end', fmt(end));
+    form.append('start', range.startStr);
+    form.append('end', range.endStr);
 
     try {
       const res = await fetch(String(opts.apiUrl), {
@@ -116,19 +125,88 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       __lastItems.set(String(opts.containerId || 'agenda-events'), data);
+      saveCachedAgenda(opts, range, data);
       renderEvents(data, opts);
       renderSummary(data, opts);
     } catch (err) {
       console.warn('Agenda fetch failed:', err);
+      renderEmptyState(opts);
+    }
+  }
+
+  function getAgendaRange(opts) {
+    const start = new Date();
+    const end = new Date(start);
+    end.setDate(end.getDate() + Number(opts.daysAhead || 30));
+
+    const fmt = (d) => d.toISOString().slice(0, 10);
+    return {
+      start,
+      end,
+      startStr: fmt(start),
+      endStr: fmt(end)
+    };
+  }
+
+  function buildCacheKey(opts, range) {
+    const prefix = String(opts.cacheKeyPrefix || 'revivre:agenda');
+    const id = String(opts.id || '');
+    const pageId = String(opts.pageId || '');
+    return `${prefix}:id=${id}:page=${pageId}:start=${range.startStr}:end=${range.endStr}`;
+  }
+
+  function loadCachedAgenda(opts, range) {
+    const ttl = Number(opts.cacheTtlMs);
+    if (!isFinite(ttl) || ttl <= 0) return null;
+    if (!('sessionStorage' in window)) return null;
+
+    try {
+      const key = buildCacheKey(opts, range);
+      const raw = window.sessionStorage.getItem(key);
+      if (!raw) return null;
+
+      const parsed = JSON.parse(raw);
+      const fetchedAt = Number(parsed && parsed.fetchedAt);
+      const items = parsed && parsed.items;
+
+      if (!isFinite(fetchedAt) || !Array.isArray(items)) return null;
+      if ((Date.now() - fetchedAt) > ttl) return null;
+
+      return items;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveCachedAgenda(opts, range, items) {
+    const ttl = Number(opts.cacheTtlMs);
+    if (!isFinite(ttl) || ttl <= 0) return;
+    if (!('sessionStorage' in window)) return;
+    if (!Array.isArray(items)) return;
+
+    try {
+      const key = buildCacheKey(opts, range);
+      const payload = {
+        fetchedAt: Date.now(),
+        items
+      };
+      window.sessionStorage.setItem(key, JSON.stringify(payload));
+    } catch {
+      // ignore quota / privacy mode
     }
   }
 
   function renderEvents(items, opts) {
-    if (!Array.isArray(items) || items.length === 0) return;
+    const effective = applyAgendaFilter(items, opts);
+
+    if (!Array.isArray(effective) || effective.length === 0) {
+      renderEmptyState(opts);
+      return;
+    }
     const container = document.getElementById(opts.containerId);
     if (!container) return;
 
-    const filtered = items
+    const filtered = effective
       .map((it) => {
         const ds = it.date || it.start || it.eventDate || '';
         const t = new Date(ds);
@@ -136,7 +214,10 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .filter((it) => it.__ts !== null);
 
-    if (filtered.length === 0) return;
+    if (filtered.length === 0) {
+      renderEmptyState(opts);
+      return;
+    }
     filtered.sort((a, b) => a.__ts - b.__ts);
 
     container.innerHTML = '';
@@ -158,7 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!opts.summaryId) return;
     const root = document.getElementById(opts.summaryId);
     if (!root) return;
-    if (!Array.isArray(items) || items.length === 0) return;
+
+    const effective = applyAgendaFilter(items, opts);
+    if (!Array.isArray(effective) || effective.length === 0) return;
 
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -170,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return isNaN(d) ? null : d;
     };
 
-    const normalized = items
+    const normalized = effective
       .map((it) => ({ it, d: asTime(it) }))
       .filter((x) => x.d);
 
@@ -186,6 +269,148 @@ document.addEventListener('DOMContentLoaded', () => {
     root.appendChild(buildSummaryCard("Aujourd'hui", today.map((x) => x.it)));
     root.appendChild(buildSummaryCard('À venir dans le mois', thisMonth.map((x) => x.it)));
     root.appendChild(buildSummaryCard('À venir le mois prochain', nextMonth.map((x) => x.it)));
+  }
+
+  function clearSummary(opts) {
+    if (!opts.summaryId) return;
+    const root = document.getElementById(opts.summaryId);
+    if (!root) return;
+    root.innerHTML = '';
+  }
+
+  function renderEmptyState(opts) {
+    const container = document.getElementById(opts.containerId);
+    if (container) container.innerHTML = '';
+
+    clearSummary(opts);
+
+    const fallback = document.getElementById(opts.fallbackId);
+    if (!fallback) return;
+
+    fallback.style.display = '';
+    setFallbackCardContent(fallback, {
+      dateLabel: 'Prochainement…',
+      title: 'Aucun groupe ou atelier de disponible pour le moment',
+      description: 'Les prochains évènements seront annoncés par e-mail très prochainement.'
+    });
+  }
+
+  function setFallbackCardContent(fallbackRoot, content) {
+    const card = fallbackRoot.querySelector('.event-card') || fallbackRoot;
+
+    const dayEl = card.querySelector('.event-date .day');
+    const monthEl = card.querySelector('.event-date .month');
+    if (dayEl) dayEl.textContent = '';
+    if (monthEl) monthEl.textContent = String(content.dateLabel || '');
+
+    const titleEl = card.querySelector('.event-content h3') || card.querySelector('h3');
+    if (titleEl) titleEl.textContent = String(content.title || '');
+
+    const infoEls = card.querySelectorAll('.event-content .event-info');
+    infoEls.forEach((el) => {
+      el.textContent = '';
+      el.style.display = 'none';
+    });
+
+    const contentRoot = card.querySelector('.event-content') || card;
+    let descEl = contentRoot.querySelector('.event-empty-desc');
+    if (!descEl) {
+      descEl = document.createElement('p');
+      descEl.className = 'event-empty-desc';
+      contentRoot.appendChild(descEl);
+    }
+    descEl.textContent = String(content.description || '');
+  }
+
+  function ensureCityFilterUI(opts) {
+    const container = document.getElementById(opts.containerId);
+    if (!container) return;
+
+    const existing = document.getElementById(getCityFilterId(opts));
+    if (existing) return;
+
+    const wrap = document.createElement('div');
+    wrap.id = getCityFilterId(opts);
+    wrap.className = 'agenda-city-filter';
+
+    const label = document.createElement('label');
+    label.setAttribute('for', getCitySelectId(opts));
+    label.textContent = 'Ville (présentiel)';
+    wrap.appendChild(label);
+
+    const select = document.createElement('select');
+    select.id = getCitySelectId(opts);
+    select.name = 'agenda-city';
+    select.setAttribute('aria-label', 'Filtrer les groupes en présentiel par ville');
+
+    const options = [
+      { value: '', label: 'Tous les événements' },
+      { value: 'toulouse', label: 'Toulouse' },
+      { value: 'marseille', label: 'Marseille' },
+      { value: 'paris', label: 'Paris' }
+    ];
+    options.forEach((o) => {
+      const opt = document.createElement('option');
+      opt.value = o.value;
+      opt.textContent = o.label;
+      select.appendChild(opt);
+    });
+
+    const stateKey = String(opts.containerId || 'agenda-events');
+    const saved = __filterState.get(stateKey);
+    if (saved && typeof saved.city === 'string') {
+      select.value = saved.city;
+    }
+
+    select.addEventListener('change', () => {
+      __filterState.set(stateKey, { city: select.value });
+      const items = __lastItems.get(stateKey);
+      if (items !== undefined) {
+        renderEvents(items, opts);
+        renderSummary(items, opts);
+      }
+    });
+
+    wrap.appendChild(select);
+    container.parentNode.insertBefore(wrap, container);
+  }
+
+  function getCityFilterId(opts) {
+    return `agenda-city-filter-${String(opts.containerId || 'agenda-events')}`;
+  }
+
+  function getCitySelectId(opts) {
+    return `agenda-city-select-${String(opts.containerId || 'agenda-events')}`;
+  }
+
+  function applyAgendaFilter(items, opts) {
+    if (!Array.isArray(items)) return items;
+
+    const stateKey = String(opts.containerId || 'agenda-events');
+    const city = getSelectedCity(stateKey, opts);
+    if (!city) return items;
+
+    const cityLower = String(city).toLowerCase();
+    return items.filter((it) => isPresentiel(it) && descriptionHasCity(it, cityLower));
+  }
+
+  function getSelectedCity(stateKey, opts) {
+    const stored = __filterState.get(stateKey);
+    if (stored && typeof stored.city === 'string') return stored.city;
+
+    const select = document.getElementById(getCitySelectId(opts));
+    if (select && typeof select.value === 'string') return select.value;
+    return '';
+  }
+
+  function isPresentiel(it) {
+    const title = String((it && (it.title || it.name)) || '').toLowerCase();
+    return title.includes('présentiel') || title.includes('presentiel');
+  }
+
+  function descriptionHasCity(it, cityLower) {
+    const desc = String((it && it.description) || '').toLowerCase();
+    return desc.includes(cityLower);
   }
 
   function buildSummaryCard(title, list) {

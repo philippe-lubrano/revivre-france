@@ -146,7 +146,7 @@ a, button {
 .section-subtitle {
     font-size: 1.1rem;
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 20px;
     color: var(--text-light);
     max-width: 600px;
     margin-left: auto;
@@ -221,7 +221,6 @@ a, button {
 .agenda-carousel {
     position: relative;
     padding: 0 56px; /* réserve de la place pour les boutons */
-    margin-top: 40px;
 }
 
 .agenda-carousel-viewport {
@@ -620,9 +619,57 @@ a.card {
   list-style: none;
 }
 
-div#agenda-events, #agenda-custom {
+div#agenda-events, #agenda-custom, #agenda-fallback {
     max-width: 900px;
     margin: auto;
+    margin-top: 40px;
+}
+
+/* Filtre ville (agenda présentiel) */
+.agenda-city-filter {
+    max-width: 900px;
+    margin: 0 auto 18px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.agenda-city-filter label {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
+}
+
+.agenda-city-filter select {
+    font: inherit;
+    color: var(--text-dark);
+    background: var(--white);
+    border: 1px solid rgba(162, 206, 228, 0.55);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.agenda-city-filter select:hover {
+    border-color: rgba(48, 113, 148, 0.45);
+}
+
+.agenda-city-filter select:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Ciblage explicite sur la home (id généré) */
+#agenda-city-select-agenda-events {
+    max-width: 100%;
+}
+
+#agenda-fallback .event-card {
+    min-height: fit-content;
+    max-height: fit-content;
 }
 
 /* Responsive */
@@ -738,6 +785,44 @@ div#agenda-events, #agenda-custom {
 
     .event-more {
         margin: 8px 0 0 0;
+    }
+
+    .agenda-city-filter {
+        justify-content: stretch;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .agenda-city-filter label {
+        width: 100%;
+        text-align: center;
+    }
+
+    .agenda-city-filter select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .testimonials-row {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+        position: relative;
+        padding-top: 26px;
+    }
+
+    .testimonials-shuffle-btn {
+        position: absolute;
+        left: 50%;
+        top: 26px;
+        transform: translate(-50%, -50%);
+        z-index: 3;
+        pointer-events: auto;
+    }
+
+    .testimonials-row > .card {
+        position: relative;
+        z-index: 1;
+        width: 100%;
     }
 }
 

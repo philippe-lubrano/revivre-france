@@ -41,7 +41,9 @@
     const testimonials = window.testimonials || window.tesimonials || []
 
     grid.innerHTML = ''
-    const chosen = pickRandomUnique(testimonials, 2)
+    const mq = window.matchMedia ? window.matchMedia('(max-width: 768px)') : null
+    const isMobile = !!(mq && mq.matches)
+    const chosen = pickRandomUnique(testimonials, isMobile ? 1 : 2)
 
     if (chosen.length === 0) return
 
@@ -60,8 +62,14 @@
 
     shuffleBtn.addEventListener('click', renderRandomTestimonials)
 
+    if (isMobile) {
+      grid.appendChild(shuffleBtn)
+      grid.appendChild(createTestimonialCard(chosen[0]))
+      return
+    }
+
     grid.appendChild(createTestimonialCard(chosen[0]))
-    if (chosen.length > 1) grid.appendChild(shuffleBtn)
+    grid.appendChild(shuffleBtn)
     if (chosen.length > 1) grid.appendChild(createTestimonialCard(chosen[1]))
   }
 
@@ -69,5 +77,16 @@
     document.addEventListener('DOMContentLoaded', renderRandomTestimonials)
   } else {
     renderRandomTestimonials()
+  }
+
+  try {
+    const mq = window.matchMedia ? window.matchMedia('(max-width: 768px)') : null
+    if (mq && typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', renderRandomTestimonials)
+    } else if (mq && typeof mq.addListener === 'function') {
+      mq.addListener(renderRandomTestimonials)
+    }
+  } catch {
+    // ignore
   }
 })()
