@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
       monthsRootId: 'agenda-months',
       legendId: 'agenda-legend',
       filterStateKey: 'agenda-calendar',
-      cityFilterMountId: 'agenda-legend'
+      cityFilterMountId: 'agenda-legend-hint-p'
     }, options || {});
 
     const run = () => {
@@ -381,6 +381,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let byDay = new Map();
 
+      let calendar = null;
+      const refreshCalendarForFilters = () => {
+        if (!calendar) return;
+        clearInjectedBookmarks();
+        byDay = new Map();
+        calendar.refetchEvents();
+        if (selectedKey) {
+          const d = dateFromKey(selectedKey);
+          if (d) showDayPanel(d, []);
+        }
+      };
+
       const renderLegend = (items) => {
         if (!legendRoot) return;
         legendRoot.innerHTML = '';
@@ -388,6 +400,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = Array.isArray(items) ? items : [];
         const seen = new Set();
         const pairs = [];
+
+        const stateKey = String(opts.filterStateKey || opts.containerId || 'agenda-events');
+        const selected = getSelectedLegendKeys(stateKey);
 
         list.forEach((it) => {
           const title = String((it && (it.title || it.name)) || '').trim();
@@ -398,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const key = `${colorRaw.toLowerCase()}|${title.toLowerCase()}`;
           if (seen.has(key)) return;
           seen.add(key);
-          pairs.push({ title, color: colorRaw });
+          pairs.push({ title, color: colorRaw, key });
         });
 
         pairs.sort((a, b) => {
@@ -410,9 +425,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         pairs.forEach((p) => {
-          const item = document.createElement('div');
+          const item = document.createElement('button');
+          item.type = 'button';
           item.className = 'agenda-legend-item';
-          item.setAttribute('role', 'listitem');
+          item.setAttribute('data-legend-key', p.key);
+          item.setAttribute('aria-pressed', selected.has(p.key) ? 'true' : 'false');
+          if (selected.has(p.key)) item.classList.add('is-selected');
 
           const swatch = document.createElement('span');
           swatch.className = 'agenda-legend-swatch';
@@ -426,13 +444,40 @@ document.addEventListener('DOMContentLoaded', () => {
           item.appendChild(swatch);
           item.appendChild(label);
           legendRoot.appendChild(item);
+
+          item.addEventListener('click', () => {
+            const next = new Set(getSelectedLegendKeys(stateKey));
+            if (next.has(p.key)) next.delete(p.key);
+            else next.add(p.key);
+            setSelectedLegendKeys(stateKey, next);
+
+            // Feedback immédiat
+            const pressed = next.has(p.key);
+            item.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+            item.classList.toggle('is-selected', pressed);
+
+            // Rafraîchit le calendrier via la même mécanique que le filtre ville.
+            refreshCalendarForFilters();
+          });
         });
+
+        // Nettoie la sélection si des items n'existent plus (ex: changement de ville)
+        // afin d'éviter un calendrier vide sans raison visible.
+        if (pairs.length) {
+          const available = new Set(pairs.map((p) => p.key));
+          const cleaned = new Set(Array.from(selected).filter((k) => available.has(k)));
+          if (cleaned.size !== selected.size) {
+            setSelectedLegendKeys(stateKey, cleaned);
+            refreshCalendarForFilters();
+          }
+        }
       };
 
       const buildMarkersForRange = async (range) => {
         const items = await fetchAgendaItemsForRange(opts, range);
-        const effective = applyAgendaFilter(items, opts);
-        renderLegend(effective);
+        const afterCity = applyAgendaCityFilter(items, opts);
+        renderLegend(afterCity);
+        const effective = applyAgendaLegendFilter(afterCity, opts);
         const map = new Map();
         (Array.isArray(effective) ? effective : []).forEach((it) => {
           const key = dayKey(it.start || it.date || it.eventDate || '');
@@ -476,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return markers;
       };
 
-      const calendar = new window.FullCalendar.Calendar(calendarEl, {
+      calendar = new window.FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'fr',
         firstDay: 1,
@@ -568,13 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Filtre ville (présentiel) : refetch + purge des marque-pages.
       ensureCityFilterUI(Object.assign({}, opts, {
         onCityChange: () => {
-          clearInjectedBookmarks();
-          byDay = new Map();
-          calendar.refetchEvents();
-          if (selectedKey) {
-            const d = dateFromKey(selectedKey);
-            if (d) showDayPanel(d, []);
-          }
+          refreshCalendarForFilters();
         }
       }));
 
@@ -894,7 +933,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const container = document.getElementById(opts.containerId);
     const mount = opts.cityFilterMountId ? document.getElementById(String(opts.cityFilterMountId)) : null;
-    const anchor = container || mount;
+    const legend = opts.legendId ? document.getElementById(String(opts.legendId)) : null;
+    const anchor = container || mount || legend;
     if (!anchor || !anchor.parentNode) return;
 
     const wrap = document.createElement('div');
@@ -931,7 +971,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     select.addEventListener('change', () => {
-      __filterState.set(stateKey, { city: select.value });
+      const prev = __filterState.get(stateKey);
+      __filterState.set(stateKey, Object.assign({}, (prev && typeof prev === 'object') ? prev : null, { city: select.value }));
       if (typeof opts.onCityChange === 'function') {
         try { opts.onCityChange(select.value); } catch { /* noop */ }
       }
@@ -957,12 +998,54 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyAgendaFilter(items, opts) {
     if (!Array.isArray(items)) return items;
 
+    const afterCity = applyAgendaCityFilter(items, opts);
+    return applyAgendaLegendFilter(afterCity, opts);
+  }
+
+  function applyAgendaCityFilter(items, opts) {
+    if (!Array.isArray(items)) return items;
+
     const stateKey = String(opts.filterStateKey || opts.containerId || 'agenda-events');
     const city = getSelectedCity(stateKey, opts);
     if (!city) return items;
 
     const cityLower = String(city).toLowerCase();
     return items.filter((it) => isPresentiel(it) && descriptionHasCity(it, cityLower));
+  }
+
+  function applyAgendaLegendFilter(items, opts) {
+    if (!Array.isArray(items)) return items;
+
+    const stateKey = String(opts.filterStateKey || opts.containerId || 'agenda-events');
+    const selected = getSelectedLegendKeys(stateKey);
+    if (!selected || selected.size === 0) return items;
+
+    return items.filter((it) => {
+      const key = getLegendKey(it);
+      if (!key) return false;
+      return selected.has(key);
+    });
+  }
+
+  function getLegendKey(it) {
+    const title = String((it && (it.title || it.name)) || '').trim();
+    const colorRaw = (it && typeof it.backgroundColor === 'string') ? it.backgroundColor.trim() : '';
+    if (!title || !colorRaw) return '';
+    if (!/^#([0-9a-fA-F]{3}){1,2}$/.test(colorRaw)) return '';
+    return `${colorRaw.toLowerCase()}|${title.toLowerCase()}`;
+  }
+
+  function getSelectedLegendKeys(stateKey) {
+    const stored = __filterState.get(stateKey);
+    const raw = stored && typeof stored === 'object' ? stored.legendKeys : null;
+    if (!Array.isArray(raw)) return new Set();
+    return new Set(raw.filter((x) => typeof x === 'string' && x.length));
+  }
+
+  function setSelectedLegendKeys(stateKey, setLike) {
+    const next = Array.from(setLike instanceof Set ? setLike : new Set());
+    const prev = __filterState.get(stateKey);
+    __filterState.set(stateKey, Object.assign({}, (prev && typeof prev === 'object') ? prev : null, { legendKeys: next }));
   }
 
   function getSelectedCity(stateKey, opts) {

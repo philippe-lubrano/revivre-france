@@ -9,22 +9,22 @@
   <meta name="theme-color" content="#307194">
   <link rel="canonical" href="https://www.revivre-france.org/agenda.html">
   <link rel="alternate" hreflang="fr-FR" href="https://www.revivre-france.org/agenda.html">
-
+  
   <meta property="og:locale" content="fr_FR">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Revivre-France">
   <meta property="og:title" content="Agenda — Revivre-France">
   <meta property="og:description" content="Prochains groupes de parole, ateliers et activités (chargés automatiquement depuis l'agenda de l'association).">
   <meta property="og:url" content="https://www.revivre-france.org/agenda.html">
-
+  
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Agenda — Revivre-France">
   <meta name="twitter:description" content="Prochains groupes de parole, ateliers et activités (agenda de l'association).">
-
+  
   <link rel="icon" type="image/png" href="assets/RF-Favicon.png">
   <link rel="apple-touch-icon" href="assets/RF-Favicon.png">
   <link rel="stylesheet" href="styles.css">
-
+  
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.revivre-france.org/#organization","name":"Revivre-France","url":"https://www.revivre-france.org/","sameAs":["https://forum.revivre-france.org/"],"contactPoint":[{"@type":"ContactPoint","telephone":"+33749828050","contactType":"information","availableLanguage":["French"],"areaServed":"FR"}],"address":{"@type":"PostalAddress","streetAddress":"apt. 403 bâtiment A, 16 rue de la Caravelle","postalCode":"31500","addressLocality":"Toulouse","addressCountry":"FR"}},{"@type":"WebSite","@id":"https://www.revivre-france.org/#website","url":"https://www.revivre-france.org/","name":"Revivre-France","inLanguage":"fr-FR","publisher":{"@id":"https://www.revivre-france.org/#organization"}},{"@type":"WebPage","@id":"https://www.revivre-france.org/agenda.html#webpage","url":"https://www.revivre-france.org/agenda.html","name":"Agenda — Revivre-France","description":"Agenda Revivre-France : prochains groupes de parole, ateliers et activités (chargés automatiquement depuis l'agenda de l'association).","inLanguage":"fr-FR","isPartOf":{"@id":"https://www.revivre-france.org/#website"},"about":{"@id":"https://www.revivre-france.org/#organization"}}]}</script>
   <script src="script.js" defer></script>
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
@@ -70,9 +70,8 @@
         <div class="container">
           <h2 class="section-title">Prochains événements</h2>
           <p class="section-subtitle">Une vue simple du mois, avec pastilles sur les jours où un événement est prévu.</p>
-
+          <p id="agenda-legend-hint-p" class="agenda-legend-hint">Vous pouvez filtrer le calendrier en sélectionnant un ou plusieurs éléments de la légende.</p>
           <div id="agenda-legend" class="agenda-legend" aria-label="Légende des couleurs" role="list"></div>
-
           <div id="agenda-calendar-layout" class="agenda-calendar-layout">
             <aside id="agenda-day-panel" class="agenda-day-panel" aria-label="Détails du jour" aria-live="polite">
               <div class="agenda-panel-date">

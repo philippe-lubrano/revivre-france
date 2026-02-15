@@ -918,6 +918,20 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     color: var(--text-dark);
     font-weight: 700;
     font-size: 0.95rem;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+}
+
+.agenda-legend-item.is-selected {
+    background: var(--neutral-light);
+    border-color: rgba(48, 113, 148, 0.35);
+    color: var(--primary);
+}
+
+.agenda-legend-item:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 3px;
 }
 
 .agenda-legend-swatch {
@@ -926,6 +940,13 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     border-radius: 999px;
     flex: 0 0 12px;
     box-shadow: 0 0 0 2px rgba(0,0,0,0.06);
+}
+
+.agenda-legend-hint {
+    margin: 12px 0 0 0;
+    text-align: center;
+    color: var(--text-light);
+    font-weight: 600;
 }
 
 .agenda-legend-label {
