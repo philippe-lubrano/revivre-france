@@ -1223,6 +1223,7 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
 
 .agenda-calendar .fc-daygrid-day {
     border-color: rgba(0, 0, 0, 0.06);
+    cursor: pointer;
 }
 
 /* Marque-page (jour avec événement) */
