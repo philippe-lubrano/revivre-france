@@ -159,7 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
       yearLabelId: 'agenda-year-label',
       yearPrevBtnId: 'agenda-year-prev',
       yearNextBtnId: 'agenda-year-next',
-      monthsRootId: 'agenda-months'
+      monthsRootId: 'agenda-months',
+      legendId: 'agenda-legend',
+      filterStateKey: 'agenda-calendar',
+      cityFilterMountId: 'agenda-legend'
     }, options || {});
 
     const run = () => {
@@ -187,6 +190,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const yearPrev = document.getElementById(opts.yearPrevBtnId);
       const yearNext = document.getElementById(opts.yearNextBtnId);
       const monthsRoot = document.getElementById(opts.monthsRootId);
+      const legendRoot = document.getElementById(opts.legendId);
+
+      const dateFromKey = (key) => {
+        if (!key || typeof key !== 'string') return null;
+        const parts = key.split('-').map((x) => Number(x));
+        if (parts.length !== 3) return null;
+        const y = parts[0];
+        const m = parts[1];
+        const d = parts[2];
+        if (!isFinite(y) || !isFinite(m) || !isFinite(d)) return null;
+        return new Date(y, m - 1, d);
+      };
+
+      const clearInjectedBookmarks = () => {
+        // Les marque-pages sont injectés via eventDidMount et ne sont pas toujours nettoyés
+        // par FullCalendar lors d'un refetch. On les purge avant de re-rendre.
+        calendarEl.querySelectorAll('.agenda-day-bookmark').forEach((el) => el.remove());
+        calendarEl.querySelectorAll('.agenda-day-has-marker').forEach((el) => el.classList.remove('agenda-day-has-marker'));
+      };
 
       const dayKey = (dateLike) => {
         const d = new Date(dateLike);
@@ -358,10 +380,61 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       let byDay = new Map();
+
+      const renderLegend = (items) => {
+        if (!legendRoot) return;
+        legendRoot.innerHTML = '';
+
+        const list = Array.isArray(items) ? items : [];
+        const seen = new Set();
+        const pairs = [];
+
+        list.forEach((it) => {
+          const title = String((it && (it.title || it.name)) || '').trim();
+          const colorRaw = (it && typeof it.backgroundColor === 'string') ? it.backgroundColor.trim() : '';
+          if (!title || !colorRaw) return;
+          if (!/^#([0-9a-fA-F]{3}){1,2}$/.test(colorRaw)) return;
+
+          const key = `${colorRaw.toLowerCase()}|${title.toLowerCase()}`;
+          if (seen.has(key)) return;
+          seen.add(key);
+          pairs.push({ title, color: colorRaw });
+        });
+
+        pairs.sort((a, b) => {
+          const ca = a.color.toLowerCase();
+          const cb = b.color.toLowerCase();
+          if (ca < cb) return -1;
+          if (ca > cb) return 1;
+          return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' });
+        });
+
+        pairs.forEach((p) => {
+          const item = document.createElement('div');
+          item.className = 'agenda-legend-item';
+          item.setAttribute('role', 'listitem');
+
+          const swatch = document.createElement('span');
+          swatch.className = 'agenda-legend-swatch';
+          swatch.style.backgroundColor = p.color;
+          swatch.setAttribute('aria-hidden', 'true');
+
+          const label = document.createElement('span');
+          label.className = 'agenda-legend-label';
+          label.textContent = p.title;
+
+          item.appendChild(swatch);
+          item.appendChild(label);
+          legendRoot.appendChild(item);
+        });
+      };
+
       const buildMarkersForRange = async (range) => {
         const items = await fetchAgendaItemsForRange(opts, range);
+        const effective = applyAgendaFilter(items, opts);
+        renderLegend(effective);
         const map = new Map();
-        (Array.isArray(items) ? items : []).forEach((it) => {
+        (Array.isArray(effective) ? effective : []).forEach((it) => {
           const key = dayKey(it.start || it.date || it.eventDate || '');
           if (!key) return;
           if (!map.has(key)) map.set(key, []);
@@ -380,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return '';
         };
 
-        return Array.from(map.keys()).map((key) => {
+        const markers = Array.from(map.keys()).map((key) => {
           const list = map.get(key) || [];
           const color = pickDayColor(list) || 'var(--primary)';
           return {
@@ -393,6 +466,14 @@ document.addEventListener('DOMContentLoaded', () => {
           extendedProps: { dayKey: key }
           };
         });
+
+        // Si un jour était déjà sélectionné, on rafraîchit le panneau avec les données filtrées.
+        if (selectedKey && panel && panel.classList && panel.classList.contains('is-open')) {
+          const d = dateFromKey(selectedKey) || new Date();
+          showDayPanel(d, byDay.get(selectedKey) || []);
+        }
+
+        return markers;
       };
 
       const calendar = new window.FullCalendar.Calendar(calendarEl, {
@@ -411,6 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             endStr: dayKey(fetchInfo.end)
           };
           try {
+            clearInjectedBookmarks();
             const markers = await buildMarkersForRange(range);
             successCallback(markers);
           } catch (err) {
@@ -471,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         datesSet: () => {
           const d = calendar.getDate();
-          if (yearLabel) yearLabel.textContent = String(d.getFullYear());
+          if (yearLabel) yearLabel.textContent = formatMonthYear(d);
           if (monthsRoot && monthsRoot.children.length) {
             Array.from(monthsRoot.children).forEach((el) => {
               const idx = Number(el.getAttribute('data-month-index'));
@@ -482,6 +564,19 @@ document.addEventListener('DOMContentLoaded', () => {
           requestAnimationFrame(() => requestAnimationFrame(syncDayPanelHeightToCalendar));
         }
       });
+
+      // Filtre ville (présentiel) : refetch + purge des marque-pages.
+      ensureCityFilterUI(Object.assign({}, opts, {
+        onCityChange: () => {
+          clearInjectedBookmarks();
+          byDay = new Map();
+          calendar.refetchEvents();
+          if (selectedKey) {
+            const d = dateFromKey(selectedKey);
+            if (d) showDayPanel(d, []);
+          }
+        }
+      }));
 
       // Topbar: année + mois (inspirée de la maquette)
       if (monthsRoot && monthsRoot.children.length === 0) {
@@ -504,14 +599,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (yearPrev) {
         yearPrev.addEventListener('click', () => {
-          const cur = calendar.getDate();
-          calendar.gotoDate(new Date(cur.getFullYear() - 1, cur.getMonth(), 1));
+          calendar.prev();
         });
       }
       if (yearNext) {
         yearNext.addEventListener('click', () => {
-          const cur = calendar.getDate();
-          calendar.gotoDate(new Date(cur.getFullYear() + 1, cur.getMonth(), 1));
+          calendar.next();
         });
       }
 
@@ -796,11 +889,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function ensureCityFilterUI(opts) {
-    const container = document.getElementById(opts.containerId);
-    if (!container) return;
-
     const existing = document.getElementById(getCityFilterId(opts));
     if (existing) return;
+
+    const container = document.getElementById(opts.containerId);
+    const mount = opts.cityFilterMountId ? document.getElementById(String(opts.cityFilterMountId)) : null;
+    const anchor = container || mount;
+    if (!anchor || !anchor.parentNode) return;
 
     const wrap = document.createElement('div');
     wrap.id = getCityFilterId(opts);
@@ -829,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
       select.appendChild(opt);
     });
 
-    const stateKey = String(opts.containerId || 'agenda-events');
+    const stateKey = String(opts.filterStateKey || opts.containerId || 'agenda-events');
     const saved = __filterState.get(stateKey);
     if (saved && typeof saved.city === 'string') {
       select.value = saved.city;
@@ -837,6 +932,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     select.addEventListener('change', () => {
       __filterState.set(stateKey, { city: select.value });
+      if (typeof opts.onCityChange === 'function') {
+        try { opts.onCityChange(select.value); } catch { /* noop */ }
+      }
       const items = __lastItems.get(stateKey);
       if (items !== undefined) {
         renderEvents(items, opts);
@@ -845,7 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     wrap.appendChild(select);
-    container.parentNode.insertBefore(wrap, container);
+    anchor.parentNode.insertBefore(wrap, anchor);
   }
 
   function getCityFilterId(opts) {
@@ -859,7 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyAgendaFilter(items, opts) {
     if (!Array.isArray(items)) return items;
 
-    const stateKey = String(opts.containerId || 'agenda-events');
+    const stateKey = String(opts.filterStateKey || opts.containerId || 'agenda-events');
     const city = getSelectedCity(stateKey, opts);
     if (!city) return items;
 

@@ -895,6 +895,52 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     grid-template-areas: "panel calendar";
 }
 
+.agenda-legend {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    align-items: center;
+}
+
+.agenda-legend:empty {
+    display: none;
+}
+
+.agenda-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--neutral-light);
+    background: var(--white);
+    border-radius: 999px;
+    padding: 6px 10px;
+    color: var(--text-dark);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.agenda-legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    flex: 0 0 12px;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.06);
+}
+
+.agenda-legend-label {
+    white-space: nowrap;
+}
+
+.agenda-legend-item {
+    max-width: 100%;
+}
+
+.agenda-legend-item .agenda-legend-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 @media (min-width: 901px) {
     .agenda-calendar-layout.has-panel {
         gap: 0;
@@ -1175,7 +1221,7 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     margin: 6px auto 0 auto;
 }
 
-.agenda-calendar .fc .fc-daygrid-day {
+.agenda-calendar .fc-daygrid-day {
     border-color: rgba(0, 0, 0, 0.06);
 }
 
@@ -1200,6 +1246,21 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
 
 .agenda-calendar .fc .fc-daygrid-day.fc-day-today {
     background: rgba(213, 235, 247, 0.35);
+}
+
+/* Jours passés */
+.agenda-calendar .fc-daygrid-day.fc-day-past {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.agenda-calendar .fc-daygrid-day.fc-day-past .fc-daygrid-day-number {
+    color: rgba(0, 0, 0, 0.35);
+}
+
+.agenda-calendar .fc-daygrid-day.fc-day-past .agenda-day-bookmark {
+    opacity: 0.40;
+    filter: saturate(0.75) brightness(0.95);
+    box-shadow: 0 8px 14px rgba(0,0,0,0.10);
 }
 
 .agenda-calendar .fc .fc-daygrid-day.is-selected {
@@ -1286,6 +1347,18 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
         margin-bottom: 10px;
     }
 
+    .agenda-calendar-year {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .agenda-year-label {
+        text-align: center;
+        text-transform: capitalize;
+        letter-spacing: 0.02em;
+    }
+
     .agenda-calendar-months {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -1293,6 +1366,12 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
         gap: 8px;
         padding: 0 2px;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .agenda-calendar-months::-webkit-scrollbar {
+        width: 0;
+        height: 0;
     }
 
     .agenda-month-tab {

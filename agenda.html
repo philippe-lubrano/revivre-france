@@ -71,6 +71,8 @@
           <h2 class="section-title">Prochains événements</h2>
           <p class="section-subtitle">Une vue simple du mois, avec pastilles sur les jours où un événement est prévu.</p>
 
+          <div id="agenda-legend" class="agenda-legend" aria-label="Légende des couleurs" role="list"></div>
+
           <div id="agenda-calendar-layout" class="agenda-calendar-layout">
             <aside id="agenda-day-panel" class="agenda-day-panel" aria-label="Détails du jour" aria-live="polite">
               <div class="agenda-panel-date">
@@ -90,9 +92,9 @@
             <div class="agenda-calendar-shell" aria-label="Calendrier des événements">
               <div class="agenda-calendar-topbar" aria-label="Navigation calendrier">
                 <div class="agenda-calendar-year">
-                  <button id="agenda-year-prev" class="agenda-cal-nav" type="button" aria-label="Année précédente">‹</button>
+                  <button id="agenda-year-prev" class="agenda-cal-nav" type="button" aria-label="Mois précédent">‹</button>
                   <span id="agenda-year-label" class="agenda-year-label">----</span>
-                  <button id="agenda-year-next" class="agenda-cal-nav" type="button" aria-label="Année suivante">›</button>
+                  <button id="agenda-year-next" class="agenda-cal-nav" type="button" aria-label="Mois suivant">›</button>
                 </div>
                 <div id="agenda-months" class="agenda-calendar-months" role="tablist" aria-label="Mois"></div>
               </div>
