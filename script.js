@@ -147,6 +147,424 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function initAgendaCalendar(options) {
+    const opts = Object.assign({}, DEFAULTS, {
+      calendarSelector: '[data-agenda-calendar="true"]',
+      panelLayoutId: 'agenda-calendar-layout',
+      panelId: 'agenda-day-panel',
+      panelBodyId: 'agenda-day-body',
+      panelDayNumId: 'agenda-panel-daynum',
+      panelWeekdayId: 'agenda-panel-weekday',
+      panelDateLabelId: 'agenda-panel-datelabel',
+      yearLabelId: 'agenda-year-label',
+      yearPrevBtnId: 'agenda-year-prev',
+      yearNextBtnId: 'agenda-year-next',
+      monthsRootId: 'agenda-months'
+    }, options || {});
+
+    const run = () => {
+      const calendarEl = document.querySelector(opts.calendarSelector);
+      if (!calendarEl) return;
+
+      if (!(window.FullCalendar && typeof window.FullCalendar.Calendar === 'function')) {
+        console.warn('FullCalendar is not available on this page.');
+        return;
+      }
+
+      if (calendarEl.__revivreCalendarInited) return;
+      calendarEl.__revivreCalendarInited = true;
+
+      const layout = document.getElementById(opts.panelLayoutId);
+      const panel = document.getElementById(opts.panelId);
+      const panelBody = document.getElementById(opts.panelBodyId);
+      const panelDayNum = document.getElementById(opts.panelDayNumId);
+      const panelWeekday = document.getElementById(opts.panelWeekdayId);
+      const panelDateLabel = document.getElementById(opts.panelDateLabelId);
+
+      const calendarShell = calendarEl ? (calendarEl.closest('.agenda-calendar-shell') || calendarEl.parentElement) : null;
+
+      const yearLabel = document.getElementById(opts.yearLabelId);
+      const yearPrev = document.getElementById(opts.yearPrevBtnId);
+      const yearNext = document.getElementById(opts.yearNextBtnId);
+      const monthsRoot = document.getElementById(opts.monthsRootId);
+
+      const dayKey = (dateLike) => {
+        const d = new Date(dateLike);
+        if (isNaN(d)) return '';
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
+      const formatDayLabel = (dateLike) => {
+        const d = new Date(dateLike);
+        if (isNaN(d)) return '';
+        return d.toLocaleDateString('fr-FR', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      };
+
+      const formatWeekday = (dateLike) => {
+        const d = new Date(dateLike);
+        if (isNaN(d)) return '';
+        return d.toLocaleDateString('fr-FR', { weekday: 'long' });
+      };
+
+      const formatMonthYear = (dateLike) => {
+        const d = new Date(dateLike);
+        if (isNaN(d)) return '';
+        return d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+      };
+
+      const getEventTimeLabel = (it) => {
+        if (!(it && it.start && it.end)) return '';
+        const startDate = new Date(it.start);
+        const endDate = new Date(it.end);
+        if (isNaN(startDate) || isNaN(endDate)) return '';
+        if (startDate.getHours() === 0 && startDate.getMinutes() === 0) return '';
+        const options = { hour: '2-digit', minute: '2-digit' };
+        return startDate.toLocaleTimeString('fr-FR', options) + ' - ' + endDate.toLocaleTimeString('fr-FR', options);
+      };
+
+      const showDayPanel = (dateLike, items) => {
+        if (!panel || !panelBody) return;
+
+        const d = new Date(dateLike);
+        const label = formatDayLabel(d);
+        if (panelDayNum) panelDayNum.textContent = isNaN(d) ? '--' : String(d.getDate()).padStart(2, '0');
+        if (panelWeekday) panelWeekday.textContent = label ? formatWeekday(d) : 'Sélectionnez';
+        if (panelDateLabel) panelDateLabel.textContent = label ? formatMonthYear(d) : 'une date';
+
+        panelBody.innerHTML = '';
+        const list = document.createElement('ul');
+        list.className = 'agenda-day-events';
+
+        const effective = Array.isArray(items) ? items : [];
+        if (effective.length === 0) {
+          const p = document.createElement('p');
+          p.className = 'agenda-day-hint';
+          p.textContent = "Aucun événement prévu ce jour.";
+          panelBody.appendChild(p);
+        } else {
+          effective
+            .slice()
+            .sort((a, b) => {
+              const ta = new Date(a.start || a.date || a.eventDate || '').getTime();
+              const tb = new Date(b.start || b.date || b.eventDate || '').getTime();
+              return (isFinite(ta) ? ta : 0) - (isFinite(tb) ? tb : 0);
+            })
+            .forEach((it) => {
+              const li = document.createElement('li');
+              li.className = 'agenda-day-event';
+
+              const h = document.createElement('h4');
+              h.className = 'agenda-day-event-title';
+              h.textContent = it.title || it.name || 'Événement';
+              li.appendChild(h);
+
+              const metaParts = [];
+              const time = getEventTimeLabel(it) || String(it.time || it.startTime || '').trim();
+              const location = String(it.location || it.venue || '').trim();
+              if (time) metaParts.push(time);
+              if (location) metaParts.push(location);
+
+              if (metaParts.length) {
+                const meta = document.createElement('p');
+                meta.className = 'agenda-day-event-meta';
+                meta.textContent = metaParts.join(' • ');
+                li.appendChild(meta);
+              }
+
+              const desc = normalizeText(it.description || '');
+              if (desc) {
+                const p = document.createElement('p');
+                p.className = 'agenda-day-event-desc';
+                p.textContent = desc;
+                li.appendChild(p);
+              }
+
+              const signupUrl = normalizeUrl(it && it.buttonUrl);
+              if (signupUrl) {
+                const a = document.createElement('a');
+                a.className = 'agenda-day-event-link';
+                a.href = signupUrl;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.textContent = "S'inscrire";
+                li.appendChild(a);
+              }
+
+              list.appendChild(li);
+            });
+          panelBody.appendChild(list);
+        }
+
+        panel.classList.add('is-open');
+        if (layout) layout.classList.add('has-panel');
+      };
+
+      const scrollToDayPanelIfMobile = () => {
+        if (!panel) return;
+        if (!panel.classList.contains('is-open')) return;
+        if (typeof window === 'undefined') return;
+        if (window.matchMedia && !window.matchMedia('(max-width: 900px)').matches) return;
+
+        const header = document.querySelector('.site-header');
+        const offset = header ? Math.ceil(header.getBoundingClientRect().height) + 12 : 12;
+        const top = panel.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      };
+
+      const syncDayPanelHeightToCalendar = () => {
+        if (!panel || !calendarShell) return;
+        if (typeof window === 'undefined') return;
+
+        // Sur mobile/tablette, on laisse le panneau prendre sa hauteur naturelle.
+        if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) {
+          panel.style.height = '';
+          panel.style.maxHeight = '';
+          return;
+        }
+
+        if (!panel.classList.contains('is-open')) {
+          panel.style.height = '';
+          panel.style.maxHeight = '';
+          return;
+        }
+
+        const h = Math.round(calendarShell.getBoundingClientRect().height);
+        if (!isFinite(h) || h <= 0) return;
+        // Évite les valeurs absurdes si le calendrier n'est pas encore layouté.
+        if (h < 200) return;
+
+        panel.style.height = String(h) + 'px';
+        panel.style.maxHeight = String(h) + 'px';
+      };
+
+      let selectedKey = '';
+      const setSelectedDay = (key) => {
+        if (!key) return;
+        if (selectedKey) {
+          const prev = calendarEl.querySelector(`[data-date="${CSS.escape(selectedKey)}"]`);
+          if (prev) prev.classList.remove('is-selected');
+        }
+        selectedKey = key;
+        const next = calendarEl.querySelector(`[data-date="${CSS.escape(key)}"]`);
+        if (next) next.classList.add('is-selected');
+      };
+
+      let byDay = new Map();
+      const buildMarkersForRange = async (range) => {
+        const items = await fetchAgendaItemsForRange(opts, range);
+        const map = new Map();
+        (Array.isArray(items) ? items : []).forEach((it) => {
+          const key = dayKey(it.start || it.date || it.eventDate || '');
+          if (!key) return;
+          if (!map.has(key)) map.set(key, []);
+          map.get(key).push(it);
+        });
+        byDay = map;
+
+        const pickDayColor = (list) => {
+          if (!Array.isArray(list)) return '';
+          for (const it of list) {
+            const c = (it && typeof it.backgroundColor === 'string') ? it.backgroundColor.trim() : '';
+            if (!c) continue;
+            // Couleurs AssoConnect typiques: hex (#rrggbb)
+            if (/^#([0-9a-fA-F]{3}){1,2}$/.test(c)) return c;
+          }
+          return '';
+        };
+
+        return Array.from(map.keys()).map((key) => {
+          const list = map.get(key) || [];
+          const color = pickDayColor(list) || 'var(--primary)';
+          return {
+          title: '',
+          start: key,
+          allDay: true,
+          classNames: ['agenda-marker'],
+          backgroundColor: color,
+          borderColor: color,
+          extendedProps: { dayKey: key }
+          };
+        });
+      };
+
+      const calendar = new window.FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'fr',
+        firstDay: 1,
+        height: 'auto',
+        timeZone: 'local',
+        headerToolbar: false,
+        dayMaxEvents: false,
+        events: async (fetchInfo, successCallback, failureCallback) => {
+          const range = {
+            start: fetchInfo.start,
+            end: fetchInfo.end,
+            startStr: dayKey(fetchInfo.start),
+            endStr: dayKey(fetchInfo.end)
+          };
+          try {
+            const markers = await buildMarkersForRange(range);
+            successCallback(markers);
+          } catch (err) {
+            console.warn('Agenda calendar fetch failed:', err);
+            failureCallback(err);
+          }
+        },
+        eventDidMount: (info) => {
+          if (!info || !info.event) return;
+          if (!Array.isArray(info.event.classNames) || !info.event.classNames.includes('agenda-marker')) return;
+
+          const key = (info.event.extendedProps && info.event.extendedProps.dayKey) ? String(info.event.extendedProps.dayKey) : '';
+          const dayCell = info.el && info.el.closest ? info.el.closest('.fc-daygrid-day') : null;
+          if (!dayCell || !key) return;
+
+          const frame = dayCell.querySelector('.fc-daygrid-day-frame') || dayCell;
+          if (frame && frame.classList) frame.classList.add('agenda-day-has-marker');
+
+          const existing = dayCell.querySelector(`.agenda-day-bookmark[data-date="${CSS.escape(key)}"]`);
+          if (existing) {
+            if (info.el) info.el.setAttribute('aria-hidden', 'true');
+            if (info.el) info.el.style.display = 'none';
+            return;
+          }
+
+          const b = document.createElement('span');
+          b.className = 'agenda-day-bookmark';
+          b.setAttribute('data-date', key);
+          b.setAttribute('aria-hidden', 'true');
+          b.style.backgroundColor = String(info.event.backgroundColor || 'var(--primary)');
+
+          const count = byDay && byDay.get ? (byDay.get(key) || []).length : 0;
+          if (count > 0) b.title = `${count} événement${count > 1 ? 's' : ''}`;
+
+          if (frame) frame.appendChild(b);
+
+          // On masque l'event DOM de FullCalendar pour éviter l'alignement (on garde dateClick).
+          if (info.el) info.el.setAttribute('aria-hidden', 'true');
+          if (info.el) info.el.style.display = 'none';
+        },
+        dateClick: (info) => {
+          const key = dayKey(info.date);
+          const items = byDay.get(key) || [];
+          setSelectedDay(key);
+          showDayPanel(info.date, items);
+          requestAnimationFrame(() => requestAnimationFrame(syncDayPanelHeightToCalendar));
+          requestAnimationFrame(() => requestAnimationFrame(scrollToDayPanelIfMobile));
+        },
+        eventClick: (info) => {
+          info.jsEvent.preventDefault();
+          const start = info.event && info.event.start ? info.event.start : null;
+          const key = start ? dayKey(start) : (info.event && info.event.extendedProps ? info.event.extendedProps.dayKey : '');
+          const items = key ? (byDay.get(key) || []) : [];
+          if (key) setSelectedDay(key);
+          showDayPanel(start || key, items);
+          requestAnimationFrame(() => requestAnimationFrame(syncDayPanelHeightToCalendar));
+          requestAnimationFrame(() => requestAnimationFrame(scrollToDayPanelIfMobile));
+        },
+        datesSet: () => {
+          const d = calendar.getDate();
+          if (yearLabel) yearLabel.textContent = String(d.getFullYear());
+          if (monthsRoot && monthsRoot.children.length) {
+            Array.from(monthsRoot.children).forEach((el) => {
+              const idx = Number(el.getAttribute('data-month-index'));
+              el.setAttribute('aria-selected', (idx === d.getMonth()) ? 'true' : 'false');
+            });
+          }
+
+          requestAnimationFrame(() => requestAnimationFrame(syncDayPanelHeightToCalendar));
+        }
+      });
+
+      // Topbar: année + mois (inspirée de la maquette)
+      if (monthsRoot && monthsRoot.children.length === 0) {
+        const monthLabels = ['Jan', 'Feb', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+        monthLabels.forEach((label, i) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'agenda-month-tab';
+          b.setAttribute('role', 'tab');
+          b.setAttribute('data-month-index', String(i));
+          b.setAttribute('aria-selected', 'false');
+          b.textContent = label;
+          b.addEventListener('click', () => {
+            const cur = calendar.getDate();
+            calendar.gotoDate(new Date(cur.getFullYear(), i, 1));
+          });
+          monthsRoot.appendChild(b);
+        });
+      }
+
+      if (yearPrev) {
+        yearPrev.addEventListener('click', () => {
+          const cur = calendar.getDate();
+          calendar.gotoDate(new Date(cur.getFullYear() - 1, cur.getMonth(), 1));
+        });
+      }
+      if (yearNext) {
+        yearNext.addEventListener('click', () => {
+          const cur = calendar.getDate();
+          calendar.gotoDate(new Date(cur.getFullYear() + 1, cur.getMonth(), 1));
+        });
+      }
+
+      calendar.render();
+
+      // Sync hauteur panneau ↔ calendrier (desktop)
+      const onResize = () => syncDayPanelHeightToCalendar();
+      window.addEventListener('resize', onResize, { passive: true });
+
+      // Sélection par défaut: aujourd'hui
+      const todayKey = dayKey(new Date());
+      setSelectedDay(todayKey);
+      showDayPanel(new Date(), byDay.get(todayKey) || []);
+      requestAnimationFrame(() => requestAnimationFrame(syncDayPanelHeightToCalendar));
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', run, { once: true });
+    } else {
+      run();
+    }
+  }
+
+  async function fetchAgendaItemsForRange(opts, range) {
+    const cached = loadCachedAgenda(opts, range);
+    if (cached !== null) return cached;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), Number(opts.requestTimeoutMs || 10000));
+
+    const form = new FormData();
+    form.append('id', String(opts.id));
+    form.append('pageId', String(opts.pageId));
+    form.append('start', String(range.startStr || ''));
+    form.append('end', String(range.endStr || ''));
+
+    try {
+      const res = await fetch(String(opts.apiUrl), {
+        method: 'POST',
+        referrerPolicy: 'origin-when-cross-origin',
+        signal: controller.signal,
+        body: form
+      });
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (Array.isArray(data)) saveCachedAgenda(opts, range, data);
+      return data;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   async function fetchAgenda(opts) {
     const range = getAgendaRange(opts);
 
@@ -835,9 +1253,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.RevivreAgenda = {
-    initAgenda
+    initAgenda,
+    initAgendaCalendar
   };
 
   // Auto-init si la page contient l'emplacement d'agenda.
   initAgenda();
+  initAgendaCalendar();
 })();

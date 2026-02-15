@@ -27,6 +27,7 @@
 
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.revivre-france.org/#organization","name":"Revivre-France","url":"https://www.revivre-france.org/","sameAs":["https://forum.revivre-france.org/"],"contactPoint":[{"@type":"ContactPoint","telephone":"+33749828050","contactType":"information","availableLanguage":["French"],"areaServed":"FR"}],"address":{"@type":"PostalAddress","streetAddress":"apt. 403 bâtiment A, 16 rue de la Caravelle","postalCode":"31500","addressLocality":"Toulouse","addressCountry":"FR"}},{"@type":"WebSite","@id":"https://www.revivre-france.org/#website","url":"https://www.revivre-france.org/","name":"Revivre-France","inLanguage":"fr-FR","publisher":{"@id":"https://www.revivre-france.org/#organization"}},{"@type":"WebPage","@id":"https://www.revivre-france.org/agenda.html#webpage","url":"https://www.revivre-france.org/agenda.html","name":"Agenda — Revivre-France","description":"Agenda Revivre-France : prochains groupes de parole, ateliers et activités (chargés automatiquement depuis l'agenda de l'association).","inLanguage":"fr-FR","isPartOf":{"@id":"https://www.revivre-france.org/#website"},"about":{"@id":"https://www.revivre-france.org/#organization"}}]}</script>
   <script src="script.js" defer></script>
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
 </head>
 <body>
   <div class="iframe-container">
@@ -68,26 +69,35 @@
       <section class="section" id="agenda">
         <div class="container">
           <h2 class="section-title">Prochains événements</h2>
-          <p class="section-subtitle">Une vue simple de l'agenda, sans menu</p>
+          <p class="section-subtitle">Une vue simple du mois, avec pastilles sur les jours où un événement est prévu.</p>
 
-          <!-- Résumé (calqué sur la page Agenda AssoConnect) -->
-          <div id="agenda-summary" class="grid grid-3"></div>
-
-          <!-- Cartes dynamiques -->
-          <div id="agenda-events" data-agenda-summary="agenda-summary" aria-live="polite"><!-- dynamic events will be injected here --></div>
-
-          <!-- Fallback statique (visible tant que ça charge / si l'API échoue) -->
-          <div id="agenda-fallback" class="grid grid-1">
-            <div class="event-card">
-              <div class="event-date">
-                <span class="day">--</span>
-                <span class="month">----</span>
+          <div id="agenda-calendar-layout" class="agenda-calendar-layout">
+            <aside id="agenda-day-panel" class="agenda-day-panel" aria-label="Détails du jour" aria-live="polite">
+              <div class="agenda-panel-date">
+                <div id="agenda-panel-daynum" class="agenda-panel-daynum">--</div>
+                <div id="agenda-panel-weekday" class="agenda-panel-weekday">Sélectionnez</div>
+                <div id="agenda-panel-datelabel" class="agenda-panel-datelabel">une date</div>
               </div>
-              <div class="event-content">
-                <h3>Événement</h3>
-                <p class="event-info">-----</p>
-                <p>Chargement de l'agenda en cours…</p>
+
+              <div class="agenda-panel-content">
+                <div class="agenda-panel-section-title">Événements</div>
+                <div id="agenda-day-body" class="agenda-day-body">
+                  <p class="agenda-day-hint">Cliquez sur un jour du calendrier pour afficher le détail.</p>
+                </div>
               </div>
+            </aside>
+
+            <div class="agenda-calendar-shell" aria-label="Calendrier des événements">
+              <div class="agenda-calendar-topbar" aria-label="Navigation calendrier">
+                <div class="agenda-calendar-year">
+                  <button id="agenda-year-prev" class="agenda-cal-nav" type="button" aria-label="Année précédente">‹</button>
+                  <span id="agenda-year-label" class="agenda-year-label">----</span>
+                  <button id="agenda-year-next" class="agenda-cal-nav" type="button" aria-label="Année suivante">›</button>
+                </div>
+                <div id="agenda-months" class="agenda-calendar-months" role="tablist" aria-label="Mois"></div>
+              </div>
+
+              <div id="calendar" class="agenda-calendar" data-agenda-calendar="true"></div>
             </div>
           </div>
         </div>
