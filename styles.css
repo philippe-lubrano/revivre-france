@@ -1275,7 +1275,7 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
 
     .agenda-panel-content {
         padding: 14px 18px 18px 18px;
-        max-height: 50vh;
+        max-height: none;
         overflow: auto;
         -webkit-overflow-scrolling: touch;
     }
