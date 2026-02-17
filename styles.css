@@ -1083,6 +1083,8 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     border-radius: 14px;
     padding: 12px;
     background: rgba(255, 255, 255, 0.10);
+    display: flex;
+    flex-direction: column;
 }
 
 .agenda-day-event-title {
@@ -1106,18 +1108,58 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     overflow-wrap: anywhere;
     word-break: break-word;
     hyphens: auto;
+    flex: 1 1 auto;
+}
+
+.agenda-day-event-desc a {
+    color: var(--accent);
+    font-weight: 900;
+    text-decoration: underline;
+}
+
+.agenda-day-event-more {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--accent);
+    font-weight: 900;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.agenda-day-event-more:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 3px;
+    border-radius: 6px;
 }
 
 .agenda-day-event-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     margin-top: 10px;
-    color: var(--accent);
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: rgba(0, 0, 0, 0.82);
     font-weight: 900;
     text-decoration: none;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+    width: fit-content;
+    flex: 0 0 auto;
 }
 
 .agenda-day-event-link:hover {
-    text-decoration: underline;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.22);
+}
+
+.agenda-day-event-link:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 3px;
 }
 
 .agenda-calendar {
@@ -1316,14 +1358,18 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     display: none;
 }
 
+#agenda .agenda-city-filter {
+    margin-top: 16px;
+}
+
 /* Ancien rendu pastille (désactivé) */
 
 @media (max-width: 900px) {
     .agenda-calendar-layout.has-panel {
         grid-template-columns: 1fr;
         grid-template-areas:
-            "calendar"
-            "panel";
+            "panel"
+            "calendar";
     }
 
     .agenda-day-panel {
@@ -1361,6 +1407,22 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
         max-height: none;
         overflow: auto;
         -webkit-overflow-scrolling: touch;
+    }
+
+    .agenda-day-event {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .agenda-day-event-desc {
+        flex: 1 1 auto;
+        padding-right: 6px;
+    }
+
+    .agenda-day-event-link {
+        flex: 0 0 auto;
+        align-self: flex-start;
+        margin-top: 12px;
     }
 
     .agenda-calendar-topbar {
@@ -1694,7 +1756,6 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
 #vue-ensemble ul {
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .prose li {
@@ -1806,4 +1867,92 @@ details.faq-item[open] > summary::after {
 .faq-answer p:last-child,
 .faq-answer ul:last-child {
     margin-bottom: 0;
+}
+
+/* FAQ : réduire le sommaire (desktop + mobile) */
+#sommaire {
+    padding: 40px 0;
+}
+#sommaire .section-title {
+    line-height: 2.2rem;
+}
+
+#sommaire .grid {
+    gap: 8px;
+}
+
+#sommaire a.card {
+    padding: 16px;
+}
+
+#sommaire a.card h3 {
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+#sommaire .section-title {
+    margin-top: 0;
+}
+
+@media (max-width: 600px) {
+    #sommaire a.card {
+        padding: 12px;
+    }
+
+    #sommaire a.card h3 {
+        font-size: 1rem;
+    }
+}
+
+/* Liens cliquables (agenda + modale) */
+.event-desc a {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.agenda-modal-body a {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+/* Fonctionnement associatif : tableau missions */
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.missions-table {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--white);
+    border: 1px solid var(--neutral-light);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.missions-table th,
+.missions-table td {
+    padding: 14px 14px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--neutral-light);
+}
+
+.missions-table thead th {
+    text-align: left;
+    color: var(--primary);
+    font-weight: 900;
+    background: linear-gradient(135deg, rgba(213, 235, 247, 0.55) 0%, var(--white) 100%);
+}
+
+.missions-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.missions-table td ul {
+    margin: 0;
+    padding-left: 18px;
 }

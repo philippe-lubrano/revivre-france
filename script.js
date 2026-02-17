@@ -252,6 +252,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return startDate.toLocaleTimeString('fr-FR', options) + ' - ' + endDate.toLocaleTimeString('fr-FR', options);
       };
 
+      const setDayPanelDescription = (targetEl, rawText) => {
+        const full = normalizeText(rawText || '');
+        if (!targetEl) return;
+        targetEl.classList.remove('is-expanded');
+        if (!full) {
+          targetEl.textContent = '';
+          return;
+        }
+        const maxChars = 150;
+        if (full.length <= maxChars) {
+          setLinkifiedText(targetEl, full);
+          return;
+        }
+
+        const truncated = full.slice(0, maxChars).trimEnd();
+        targetEl.textContent = '';
+        targetEl.appendChild(document.createTextNode(truncated + '… '));
+
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'agenda-day-event-more';
+        more.textContent = 'Lire la suite';
+        more.addEventListener('click', (e) => {
+          e.preventDefault();
+          setLinkifiedText(targetEl, full);
+          targetEl.classList.add('is-expanded');
+        });
+
+        targetEl.appendChild(more);
+      };
+
       const showDayPanel = (dateLike, items) => {
         if (!panel || !panelBody) return;
 
@@ -305,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
               if (desc) {
                 const p = document.createElement('p');
                 p.className = 'agenda-day-event-desc';
-                p.textContent = desc;
+                setDayPanelDescription(p, desc);
                 li.appendChild(p);
               }
 
@@ -1145,7 +1176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_DESC_CHARS = 220;
     const isLong = fullDesc.length > MAX_DESC_CHARS;
     desc.className = 'event-desc';
-    desc.textContent = isLong ? (fullDesc.slice(0, MAX_DESC_CHARS).trimEnd() + '…') : fullDesc;
+    setLinkifiedText(desc, isLong ? (fullDesc.slice(0, MAX_DESC_CHARS).trimEnd() + '…') : fullDesc);
 
     const signupUrl = normalizeUrl(it && it.buttonUrl);
     if (signupUrl) {
@@ -1188,6 +1219,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function normalizeText(value) {
     return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function setLinkifiedText(targetEl, rawText) {
+    if (!targetEl) return;
+    const text = String(rawText || '');
+    targetEl.textContent = '';
+    if (!text) return;
+
+    const urlRegex = /\b((?:https?:\/\/|www\.)[^\s<]+)\b/gi;
+
+    let lastIndex = 0;
+    let match;
+    while ((match = urlRegex.exec(text)) !== null) {
+      const start = match.index;
+      let urlText = match[1];
+
+      if (start > lastIndex) {
+        targetEl.appendChild(document.createTextNode(text.slice(lastIndex, start)));
+      }
+
+      let trailing = '';
+      while (urlText && /[\]\)\}\.,;:!?]$/.test(urlText)) {
+        trailing = urlText.slice(-1) + trailing;
+        urlText = urlText.slice(0, -1);
+      }
+
+      const hrefCandidate = urlText.startsWith('www.') ? `https://${urlText}` : urlText;
+      const href = normalizeUrl(hrefCandidate);
+      if (href) {
+        const a = document.createElement('a');
+        a.href = href;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = urlText;
+        targetEl.appendChild(a);
+      } else {
+        targetEl.appendChild(document.createTextNode(urlText));
+      }
+
+      if (trailing) {
+        targetEl.appendChild(document.createTextNode(trailing));
+      }
+
+      lastIndex = urlRegex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      targetEl.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
   }
 
   function normalizeUrl(value) {
@@ -1298,7 +1378,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (data.description) {
       const p = document.createElement('p');
-      p.textContent = data.description;
+      setLinkifiedText(p, data.description);
       bodyEl.appendChild(p);
     }
 
