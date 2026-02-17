@@ -1142,8 +1142,7 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     margin-top: 10px;
     padding: 10px 14px;
     border-radius: 12px;
-    background: var(--accent);
-    color: rgba(0, 0, 0, 0.82);
+    color: white;
     font-weight: 900;
     text-decoration: none;
     border: 1px solid rgba(0, 0, 0, 0.10);
@@ -1887,6 +1886,7 @@ details.faq-item[open] > summary::after {
 
 #sommaire a.card h3 {
     font-size: 1.05rem;
+    font-weight: bold;
     margin: 0;
 }
 
@@ -1955,4 +1955,67 @@ details.faq-item[open] > summary::after {
 .missions-table td ul {
     margin: 0;
     padding-left: 18px;
+}
+
+@media (max-width: 720px) {
+    .table-scroll {
+        overflow-x: visible;
+    }
+
+    .missions-table {
+        min-width: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .missions-table thead {
+        display: none;
+    }
+
+    .missions-table,
+    .missions-table tbody,
+    .missions-table tr,
+    .missions-table th,
+    .missions-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .missions-table tbody tr {
+        border: 1px solid var(--neutral-light);
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--white);
+        margin-bottom: 12px;
+    }
+
+    .missions-table tbody th[scope="row"] {
+        border-bottom: 1px solid var(--neutral-light);
+        background: linear-gradient(135deg, rgba(213, 235, 247, 0.55) 0%, var(--white) 100%);
+        color: var(--primary);
+        font-weight: 900;
+    }
+
+    .missions-table tbody th[scope="row"]::before,
+    .missions-table tbody td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-light);
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .missions-table tbody td {
+        border-bottom: 1px solid var(--neutral-light);
+    }
+
+    .missions-table tbody tr:last-child td {
+        border-bottom: 1px solid var(--neutral-light);
+    }
+
+    .missions-table tbody tr td:last-child {
+        border-bottom: 0;
+    }
 }

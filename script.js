@@ -348,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 a.target = '_blank';
                 a.rel = 'noopener noreferrer';
                 a.textContent = "S'inscrire";
+                a.style.background = it.backgroundColor || 'var(--accent)';
                 li.appendChild(a);
               }
 
