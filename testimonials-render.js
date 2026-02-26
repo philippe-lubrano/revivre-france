@@ -25,7 +25,7 @@
     const cite = document.createElement('cite')
     const who = (name ?? '').trim()
     const when = (date ?? '').trim()
-    cite.textContent = `- ${[who, when].filter(Boolean).join(', le ')}`
+    cite.textContent = `- ${[who, when].filter(Boolean).join(', ')}`
 
     cardContent.appendChild(p)
     cardContent.appendChild(cite)

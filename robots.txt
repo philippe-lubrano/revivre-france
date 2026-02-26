@@ -4,4 +4,4 @@ Allow: /
 Disallow: /index_old.html
 Disallow: /accueil-marseille.html
 
-Sitemap: https://www.revivre-france.org/sitemap.xml
+Sitemap: https://revivre-france.assoconnect.com/sitemap.xml

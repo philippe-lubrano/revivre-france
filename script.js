@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     summaryId: null,
     requestTimeoutMs: 10000,
     cacheTtlMs: 15 * 60 * 1000,
+    cacheMaxAgeMs: 60 * 60 * 1000,
     cacheKeyPrefix: 'revivre:agenda'
   };
 
@@ -253,22 +254,21 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const setDayPanelDescription = (targetEl, rawText) => {
-        const full = normalizeText(rawText || '');
+        const maxChars = 150;
+        const full = normalizeText(rawText || '', { preserveLineBreaks: maxChars < 150 });
         if (!targetEl) return;
         targetEl.classList.remove('is-expanded');
         if (!full) {
           targetEl.textContent = '';
           return;
         }
-        const maxChars = 150;
         if (full.length <= maxChars) {
           setLinkifiedText(targetEl, full);
           return;
         }
 
-        const truncated = full.slice(0, maxChars).trimEnd();
-        targetEl.textContent = '';
-        targetEl.appendChild(document.createTextNode(truncated + '… '));
+        const truncated = truncatePreviewText(full, maxChars);
+        setLinkifiedText(targetEl, truncated + '… ');
 
         const more = document.createElement('button');
         more.type = 'button';
@@ -794,6 +794,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function loadCachedAgenda(opts, range) {
     const ttl = Number(opts.cacheTtlMs);
+    const maxAge = Number(opts.cacheMaxAgeMs);
     if (!isFinite(ttl) || ttl <= 0) return null;
     if (!('sessionStorage' in window)) return null;
 
@@ -805,9 +806,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const parsed = JSON.parse(raw);
       const fetchedAt = Number(parsed && parsed.fetchedAt);
       const items = parsed && parsed.items;
+      const age = Date.now() - fetchedAt;
 
       if (!isFinite(fetchedAt) || !Array.isArray(items)) return null;
-      if ((Date.now() - fetchedAt) > ttl) return null;
+      if (age > ttl) return null;
+      if (isFinite(maxAge) && maxAge > 0 && age > maxAge) return null;
 
       return items;
     } catch {
@@ -1173,11 +1176,11 @@ document.addEventListener('DOMContentLoaded', () => {
     info2.textContent = it.time || it.startTime || '';
 
     const desc = document.createElement('p');
-    const fullDesc = normalizeText(it.description || '');
     const MAX_DESC_CHARS = 220;
+    const fullDesc = normalizeText(it.description || '', { preserveLineBreaks: MAX_DESC_CHARS < 300 });
     const isLong = fullDesc.length > MAX_DESC_CHARS;
     desc.className = 'event-desc';
-    setLinkifiedText(desc, isLong ? (fullDesc.slice(0, MAX_DESC_CHARS).trimEnd() + '…') : fullDesc);
+    setLinkifiedText(desc, isLong ? (truncatePreviewText(fullDesc, MAX_DESC_CHARS) + '…') : fullDesc);
 
     const signupUrl = normalizeUrl(it && it.buttonUrl);
     if (signupUrl) {
@@ -1218,8 +1221,41 @@ document.addEventListener('DOMContentLoaded', () => {
     return card;
   }
 
-  function normalizeText(value) {
-    return String(value || '').replace(/\s+/g, ' ').trim();
+  function normalizeText(value, options) {
+    const opts = Object.assign({ preserveLineBreaks: false }, options || {});
+    const raw = String(value || '');
+    let normalized = raw
+      .replace(/\\r\\n|\\n|\\r/g, '\n')
+      .replace(/\r\n?|\u2028|\u2029/g, '\n')
+      .split('\n')
+      .map((line) => line.replace(/[ \t\f\v]+/g, ' ').trim())
+      .join('\n');
+
+    if (!opts.preserveLineBreaks) {
+      normalized = normalized.replace(/\n{3,}/g, '\n\n');
+    }
+
+    return normalized.trim();
+  }
+
+  function truncatePreviewText(text, maxChars) {
+    const limit = Number(maxChars);
+    if (!isFinite(limit) || limit <= 0) return '';
+    const sliced = String(text || '').slice(0, limit);
+    return limit < 300 ? sliced : sliced.trimEnd();
+  }
+
+  function appendTextWithLineBreaks(targetEl, text) {
+    const chunks = String(text || '').split(/\r\n|\r|\n/);
+    chunks.forEach((chunk, index) => {
+      if (index > 0) {
+        const lineBreak = document.createElement('span');
+        lineBreak.className = 'line-break';
+        lineBreak.setAttribute('aria-hidden', 'true');
+        targetEl.appendChild(lineBreak);
+      }
+      if (chunk) targetEl.appendChild(document.createTextNode(chunk));
+    });
   }
 
   function setLinkifiedText(targetEl, rawText) {
@@ -1237,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let urlText = match[1];
 
       if (start > lastIndex) {
-        targetEl.appendChild(document.createTextNode(text.slice(lastIndex, start)));
+        appendTextWithLineBreaks(targetEl, text.slice(lastIndex, start));
       }
 
       let trailing = '';
@@ -1256,18 +1292,18 @@ document.addEventListener('DOMContentLoaded', () => {
         a.textContent = urlText;
         targetEl.appendChild(a);
       } else {
-        targetEl.appendChild(document.createTextNode(urlText));
+        appendTextWithLineBreaks(targetEl, urlText);
       }
 
       if (trailing) {
-        targetEl.appendChild(document.createTextNode(trailing));
+        appendTextWithLineBreaks(targetEl, trailing);
       }
 
       lastIndex = urlRegex.lastIndex;
     }
 
     if (lastIndex < text.length) {
-      targetEl.appendChild(document.createTextNode(text.slice(lastIndex)));
+      appendTextWithLineBreaks(targetEl, text.slice(lastIndex));
     }
   }
 

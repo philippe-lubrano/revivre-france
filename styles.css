@@ -711,6 +711,13 @@ a.card {
     overflow: hidden;
 }
 
+.event-desc .line-break,
+.agenda-day-event-desc .line-break,
+.agenda-modal-body .line-break {
+    display: block;
+    height: 0.45em;
+}
+
 .event-more {
     margin: 8px auto 0 auto;
     padding: 0;
@@ -1705,6 +1712,10 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     .testimonials-row > .card {
         position: relative;
         z-index: 1;
+        width: 100%;
+    }
+
+    .agenda-carousel-slide {
         width: 100%;
     }
 }
