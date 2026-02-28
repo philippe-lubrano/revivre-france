@@ -879,6 +879,7 @@ a.card {
 
 .highlight-box ul {
   list-style: none;
+  padding: 0;
 }
 
 div#agenda-events, #agenda-custom, #agenda-fallback {
