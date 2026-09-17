@@ -53,6 +53,81 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const initSiteAlertBanner = () => {
+    const ensureContainer = () => {
+      const existing = document.getElementById('zone-banniere-revivre');
+      if (existing) return existing;
+
+      const header = document.querySelector('.site-header');
+      if (!header || !header.parentNode) return null;
+
+      const created = document.createElement('div');
+      created.id = 'zone-banniere-revivre';
+      header.insertAdjacentElement('afterend', created);
+      return created;
+    };
+
+    const escapeHtml = (value) => String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+
+    const formatBannerTextHtml = (value) => {
+      const normalized = String(value || '')
+        .replace(/\r\n?|\u2028|\u2029/g, '\n')
+        .replace(/\n*<br\s*\/?>\n*/gi, '\n');
+
+      return normalized
+        .split('\n')
+        .map((part) => escapeHtml(part))
+        .join('<br>');
+    };
+
+    const urlJson = `banniere.json?v=${Date.now()}`;
+    fetch(urlJson)
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        const texteBrut = data && typeof data.texte === 'string' ? data.texte : '';
+        const texteVisible = texteBrut
+          .replace(/<br\s*\/?>/gi, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (!(data && data.actif === true && texteVisible !== '')) {
+          return;
+        }
+
+        const conteneur = ensureContainer();
+        if (!conteneur) return;
+
+        const texteHtml = formatBannerTextHtml(texteBrut);
+        const lien = typeof data.lien === 'string' ? data.lien.trim() : '';
+        const hasLink = /^https?:\/\//i.test(lien);
+
+        const messageHtml = hasLink
+          ? `<a class="site-alert-banner-link" href="${escapeHtml(lien)}" target="_blank" rel="noopener noreferrer">${texteHtml}</a>`
+          : `<span>${texteHtml}</span>`;
+
+        conteneur.innerHTML = `
+          <div class="site-alert-banner" role="status" aria-live="polite">
+            <div class="site-alert-banner-inner">
+              ${messageHtml}
+            </div>
+          </div>
+        `;
+      })
+      .catch(() => {
+        // Pas de bannière disponible : affichage normal du site.
+      });
+  };
+
+  initSiteAlertBanner();
+
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
       e.preventDefault();
