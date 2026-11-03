@@ -151,15 +151,24 @@ a, button {
 .site-agenda-link {
     display: none;
     flex: 0 0 auto;
-    font-size: 2.75rem;
-    line-height: 1;
+    color: var(--primary);
     text-decoration: none;
+    line-height: 0;
+}
+
+.site-agenda-link svg {
+    display: block;
+    width: 44px;
+    height: 44px;
+}
+
+.site-agenda-link:hover {
+    color: #255a73;
 }
 
 .site-agenda-link:focus-visible {
     outline: 2px solid var(--secondary);
     outline-offset: 3px;
-    border-radius: 4px;
 }
 
 .site-nav a {
