@@ -147,6 +147,21 @@ a, button {
 .site-nav-toggle-bars span { top: 7px; }
 .site-nav-toggle-bars::after { bottom: 0; }
 
+/* Raccourci agenda du header (mobile uniquement) */
+.site-agenda-link {
+    display: none;
+    flex: 0 0 auto;
+    font-size: 2.75rem;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.site-agenda-link:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
 .site-nav a {
     text-decoration: none;
     color: var(--text-dark);
@@ -323,6 +338,10 @@ a, button {
     }
 
     .site-nav-toggle {
+        display: inline-flex;
+    }
+
+    .site-agenda-link {
         display: inline-flex;
     }
 
@@ -542,6 +561,7 @@ a, button {
 .grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
 .grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .grid-4 { grid-template-columns: repeat(4, minmax(250px, 1fr)); }
+.grid-full { grid-column: 1 / -1; }
 
 /* Témoignages: 2 cartes avec bouton shuffle au milieu */
 .testimonials-row {
@@ -1003,6 +1023,66 @@ a.card {
 .highlight-box ul {
   list-style: none;
   padding: 0;
+}
+
+/* Encart informatif « chiffres clés » */
+.info-box {
+    max-width: 920px;
+    margin: 0 auto 45px auto;
+    padding: clamp(20px, 4vw, 32px);
+    background: var(--neutral-light);
+    border-left: 6px solid var(--primary);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(48, 113, 148, 0.12);
+}
+
+.info-box-title {
+    margin: 0 0 20px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.info-box-figures {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+}
+
+.info-box-figures li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.info-box-figure {
+    flex: 0 0 auto;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--primary);
+}
+
+.info-box-label {
+    flex: 1 1 260px;
+    color: var(--text-dark);
+}
+
+.info-box-sources {
+    margin: 20px 0 0 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--neutral-dark);
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.info-box-sources a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: underline;
 }
 
 div#agenda-events, #agenda-custom, #agenda-fallback {
@@ -1892,6 +1972,14 @@ div#agenda-events, #agenda-custom, #agenda-fallback {
     flex-direction: column;
 }
 
+/* Liste des conférences (page Remerciements) : alignée à gauche */
+#conferences, #autres {
+    .prose ul {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
 .prose li {
     margin: 8px 0;
 }
@@ -2152,5 +2240,206 @@ details.faq-item[open] > summary::after {
 
     .missions-table tbody tr td:last-child {
         border-bottom: 0;
+    }
+}
+
+/* ==========================================================================
+   Consentement cookies (RGPD / CNIL) + Consent Mode v2 — voir consent.js
+   ========================================================================== */
+
+.rf-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.rf-consent {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 200;
+    background: var(--white);
+    border-top: 1px solid var(--neutral-dark);
+    box-shadow: 0 -8px 28px rgba(31, 84, 117, 0.18);
+    padding: 20px 0;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.rf-consent[hidden] {
+    display: none !important;
+}
+
+.rf-consent:focus {
+    outline: none;
+}
+
+.rf-consent-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px 32px;
+}
+
+.rf-consent-text {
+    flex: 1 1 460px;
+    min-width: 240px;
+}
+
+.rf-consent-title {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.rf-consent-text > p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-light);
+}
+
+.rf-consent-details {
+    margin-top: 10px;
+    font-size: 0.88rem;
+    color: var(--text-light);
+}
+
+.rf-consent-details > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary);
+    padding: 2px 0;
+}
+
+.rf-consent-details > summary:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+.rf-consent-details p {
+    margin: 10px 0 0;
+}
+
+.rf-consent-details table {
+    width: 100%;
+    max-width: 620px;
+    margin-top: 10px;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.rf-consent-details th,
+.rf-consent-details td {
+    border: 1px solid var(--neutral-light);
+    padding: 7px 9px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.rf-consent-details th {
+    background: var(--neutral-light);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.rf-consent-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Refuser et Accepter ont volontairement la même taille et le même poids
+   visuel : la CNIL exige que le refus soit aussi simple que l'acceptation. */
+.rf-consent-btn {
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    min-width: 150px;
+    padding: 13px 30px;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.rf-consent-btn:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.rf-consent-btn--accept {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+
+.rf-consent-btn--accept:hover {
+    background: #255a73;
+    border-color: #255a73;
+}
+
+.rf-consent-btn--reject {
+    background: var(--neutral-dark);
+    border-color: var(--neutral-dark);
+    color: #1f5475;
+}
+
+.rf-consent-btn--reject:hover {
+    background: #8bbcd8;
+    border-color: #8bbcd8;
+}
+
+.site-footer .footer-cookie-link {
+    margin-right: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--primary);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.site-footer .footer-cookie-link:hover {
+    color: #255a73;
+}
+
+.site-footer .footer-cookie-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+    .rf-consent-inner {
+        padding: 0 16px;
+        gap: 14px;
+    }
+
+    .rf-consent-actions {
+        width: 100%;
+    }
+
+    .rf-consent-btn {
+        flex: 1 1 130px;
+        padding: 13px 16px;
     }
 }

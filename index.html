@@ -28,15 +28,22 @@
   <script src="script.js" defer></script>
   <script src="testimonials.js" defer></script>
   <script src="testimonials-render.js" defer></script>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GS8F7MJQ19"></script>
+  <!-- Google Analytics 4 + Consent Mode v2 — gtag.js n'est chargé qu'après accord (voir consent.js) -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
 
-    gtag('config', 'G-GS8F7MJQ19');
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'analytics_storage': 'denied',
+      'functionality_storage': 'denied',
+      'personalization_storage': 'denied',
+      'security_storage': 'granted'
+    });
   </script>
+  <script src="consent.js"></script>
 </head>
 <body>
   <div class="iframe-container">
@@ -46,13 +53,14 @@
           <a class="site-brand" href="index.html" aria-label="Revivre-France, accueil">
             <img src="assets/RF-Favicon.png" alt="Revivre-France" class="site-brand-logo" width="44" height="44" loading="eager" decoding="async">
           </a>
+          <a class="site-agenda-link" href="#agenda" aria-label="Voir l’agenda">📆</a>
           <button class="site-nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav">
             <span class="site-nav-toggle-bars"><span></span></span>
           </button>
           <nav class="site-nav" id="site-nav" aria-label="Navigation principale">
             <a href="index.html" aria-current="page">Accueil</a>
             <a href="l-association.html">L'association</a>
-            <a href="agenda.html">Planning</a>
+            <a href="agenda.html">Agenda</a>
             <a href="troubles-anxieux.html">Troubles anxieux</a>
             <a href="associations.html">Partenariats</a>
             <a href="services-ecoute.html">Services d’écoute</a>
@@ -71,6 +79,7 @@
           <div class="hero-buttons">
             <a href="adhesion.html" class="btn btn-primary">Adhérer à l'Association</a>
             <a href="https://revivre-france.assoconnect.com/collect/description/200648-e-don-a-revivre-france" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Faire un Don</a>
+            <a href="https://forms.cloud.microsoft/e/4Vk7pNa8a0?origin=lprLink" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Devenir bénévole</a>
           </div>
         </div>
       </section>
@@ -190,6 +199,18 @@
         </div>
       </section> -->
 
+      <section class="section section-blue" id="benevolat">
+        <div class="container">
+          <div class="highlight-box">
+            <h3>Devenez bénévole chez Revivre-France&nbsp;💙</h3>
+            <p>Vous voulez soutenir des personnes concernées par les troubles anxieux, à votre rythme et selon vos disponibilités ? Rejoignez notre équipe de bénévoles — quelques minutes suffisent pour nous dire vos disponibilités, ce qui vous anime et vous correspond.</p>
+            <p style="margin-top: 24px;">
+              <a href="devenir-benevole.html" class="btn btn-secondary">En savoir plus</a>
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="section section-gray" id="adhesion">
         <div class="container">
           <h2 class="section-title">Vous pouvez nous aider</h2>
@@ -221,7 +242,7 @@
             <div class="footer-title">Liens</div>
             <div class="footer-links">
               <a href="l-association.html">L'association</a>
-              <a href="agenda.html">Planning</a>
+              <a href="agenda.html">Agenda</a>
               <a href="foire-aux-questions.html">FAQ</a>
               <a href="services-ecoute.html">Services d’écoute</a>
             </div>

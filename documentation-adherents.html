@@ -27,15 +27,22 @@
   <script src="script.js" defer></script>
 
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.revivre-france.org/#organization","name":"Revivre-France","url":"https://www.revivre-france.org/","sameAs":["https://forum.revivre-france.org/"],"contactPoint":[{"@type":"ContactPoint","telephone":"+33749828050","contactType":"information","availableLanguage":["French"],"areaServed":"FR"}],"address":{"@type":"PostalAddress","streetAddress":"apt. 403 bâtiment A, 16 rue de la Caravelle","postalCode":"31500","addressLocality":"Toulouse","addressCountry":"FR"}},{"@type":"WebSite","@id":"https://www.revivre-france.org/#website","url":"https://www.revivre-france.org/","name":"Revivre-France","inLanguage":"fr-FR","publisher":{"@id":"https://www.revivre-france.org/#organization"}},{"@type":"WebPage","@id":"https://www.revivre-france.org/documentation-adherents.html#webpage","url":"https://www.revivre-france.org/documentation-adherents.html","name":"Documentation adhérents — Revivre-France","description":"Documents destinés aux adhérents de Revivre-France : comptes-rendus d'assemblées générales, rapports et programmes d'activités.","inLanguage":"fr-FR","isPartOf":{"@id":"https://www.revivre-france.org/#website"},"about":{"@id":"https://www.revivre-france.org/#organization"}}]}</script>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GS8F7MJQ19"></script>
+  <!-- Google Analytics 4 + Consent Mode v2 — gtag.js n'est chargé qu'après accord (voir consent.js) -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
 
-    gtag('config', 'G-GS8F7MJQ19');
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'analytics_storage': 'denied',
+      'functionality_storage': 'denied',
+      'personalization_storage': 'denied',
+      'security_storage': 'granted'
+    });
   </script>
+  <script src="consent.js"></script>
 </head>
 <body>
   <div class="iframe-container">
@@ -51,7 +58,7 @@
           <nav class="site-nav" id="site-nav" aria-label="Navigation principale">
             <a href="index.html">Accueil</a>
             <a href="l-association.html">L'association</a>
-            <a href="agenda.html">Planning</a>
+            <a href="agenda.html">Agenda</a>
             <a href="troubles-anxieux.html">Troubles anxieux</a>
             <a href="associations.html">Partenariats</a>
             <a href="services-ecoute.html">Services d'écoute</a>
@@ -80,7 +87,17 @@
           <h2 class="section-title">Assemblées générales</h2>
           <p class="section-subtitle">Comptes-rendus des assemblées générales</p>
 
-          <div class="grid grid-1">
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="card-content">
+                <h3>Procuration AG 2026</h3>
+                <p>Formulaire de procuration pour l'assemblée générale 2026.</p>
+                <div class="hero-buttons">
+                  <a href="documents/RF-Procuration-AG-2026.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ouvrir</a>
+                  <a href="documents/RF-Procuration-AG-2026.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Télécharger</a>
+                </div>
+              </div>
+            </div>
             <div class="card">
               <div class="card-content">
                 <h3>Compte-rendu AG 2025</h3>
@@ -91,16 +108,6 @@
                 </div>
               </div>
             </div>
-            <!-- <div class="card">
-              <div class="card-content">
-                <h3>Procuration AG 2025</h3>
-                <p>Formulaire de procuration pour l'assemblée générale 2025.</p>
-                <div class="hero-buttons">
-                  <a href="documents/RF-Procuration-AG-2025.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ouvrir</a>
-                  <a href="documents/RF-Procuration-AG-2025.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Télécharger</a>
-                </div>
-              </div>
-            </div> -->
           </div>
         </div>
       </section>
@@ -111,6 +118,17 @@
           <p class="section-subtitle">Bilans et programmes annuels de l'association</p>
 
           <div class="grid grid-2">
+            <div class="card grid-full">
+              <div class="card-content">
+                <h3>Rapport d'activités 2026</h3>
+                <p>Bilan des activités de l'association pour l'année 2026.</p>
+                <div class="hero-buttons">
+                  <a href="documents/RF-Rapport-Activités-2026.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ouvrir</a>
+                  <a href="documents/RF-Rapport-Activités-2026.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Télécharger</a>
+                </div>
+              </div>
+            </div>
+
             <div class="card">
               <div class="card-content">
                 <h3>Rapport d'activités 2025</h3>
@@ -169,7 +187,7 @@ Les dons permettent d'assurer les frais de fonctionnement de l'association.</p>
             <div class="footer-title">Liens</div>
             <div class="footer-links">
               <a href="l-association.html">L'association</a>
-              <a href="agenda.html">Planning</a>
+              <a href="agenda.html">Agenda</a>
               <a href="foire-aux-questions.html">FAQ</a>
               <a href="services-ecoute.html">Services d'écoute</a>
             </div>

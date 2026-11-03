@@ -25,15 +25,22 @@
   <link rel="stylesheet" href="styles.css">
 
   <script src="script.js" defer></script>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GS8F7MJQ19"></script>
+  <!-- Google Analytics 4 + Consent Mode v2 — gtag.js n'est chargé qu'après accord (voir consent.js) -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
 
-    gtag('config', 'G-GS8F7MJQ19');
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'analytics_storage': 'denied',
+      'functionality_storage': 'denied',
+      'personalization_storage': 'denied',
+      'security_storage': 'granted'
+    });
   </script>
+  <script src="consent.js"></script>
 </head>
 <body>
   <div class="iframe-container">
@@ -49,7 +56,7 @@
           <nav class="site-nav" id="site-nav" aria-label="Navigation principale">
             <a href="index.html">Accueil</a>
             <a href="l-association.html">L'association</a>
-            <a href="agenda.html">Planning</a>
+            <a href="agenda.html">Agenda</a>
             <a href="troubles-anxieux.html">Troubles anxieux</a>
             <a href="associations.html">Partenariats</a>
             <a href="services-ecoute.html">Services d’écoute</a>
@@ -176,7 +183,7 @@
             <div class="footer-title">Liens</div>
             <div class="footer-links">
               <a href="l-association.html">L'association</a>
-              <a href="agenda.html">Planning</a>
+              <a href="agenda.html">Agenda</a>
               <a href="troubles-anxieux.html">Troubles anxieux</a>
               <a href="foire-aux-questions.html">FAQ</a>
               <a href="services-ecoute.html">Services d’écoute</a>
